@@ -102,7 +102,7 @@ test('README is organized around user-facing setup, configuration, and troublesh
   assert.match(readme, /## Configuration/);
   assert.match(readme, /## Troubleshooting/);
   assert.match(readme, /Copilot CLI Launcher: Open Settings/);
-  assert.match(readme, /gh extension install github\/gh-copilot/);
+  assert.match(readme, /npm install -g @github\/copilot/);
   assert.match(readme, /npm run package/);
   assert.match(readme, /uses the active editor/i);
   assert.match(readme, /does not collect telemetry, analytics, or personal data/i);
@@ -133,7 +133,7 @@ test('README documents key features and privacy notes', () => {
   const readme = readText('README.md');
 
   assert.match(readme, /does not collect telemetry, analytics, or personal data\./i);
-  assert.match(readme, /gh extension install github\/gh-copilot/);
+  assert.match(readme, /npm install -g @github\/copilot/);
   assert.match(readme, /npm run package/);
 });
 

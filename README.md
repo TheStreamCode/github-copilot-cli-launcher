@@ -23,32 +23,19 @@ Works on Windows, macOS, and Linux.
 ## Requirements
 
 - VS Code `^1.86.0`
-- [GitHub CLI (`gh`)](https://cli.github.com/) available in the integrated terminal
-- `gh-copilot` extension installed (`gh extension install github/gh-copilot`)
+- Copilot CLI installed (`npm install -g @github/copilot`)
 
 ## Installation
 
 1. **Install the extension** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher).
 
-2. **Install GitHub CLI:**
+2. **Install Copilot CLI:**
 
    ```bash
-   # macOS
-   brew install gh
-
-   # Windows (winget)
-   winget install --id GitHub.cli
-
-   # Linux — see https://cli.github.com/ for your distribution
+   npm install -g @github/copilot
    ```
 
-3. **Install the Copilot CLI extension:**
-
-   ```bash
-   gh extension install github/gh-copilot
-   ```
-
-4. Open any file in VS Code and click the launcher button in the editor title.
+3. Open any file in VS Code and click the launcher button in the editor title.
 
 ## How It Works
 
@@ -83,17 +70,15 @@ Windows executable path with spaces:
 
 ## Troubleshooting
 
-### `gh` is not recognized
+### Copilot CLI is not found
 
-Install the GitHub CLI from [https://cli.github.com/](https://cli.github.com/) and confirm that `gh` works in a regular integrated terminal. If your setup relies on shell initialization, restart VS Code after installation so new terminals inherit the updated environment.
-
-### The gh-copilot extension is not installed
-
-Install it with:
+Install Copilot CLI globally with npm:
 
 ```bash
-gh extension install github/gh-copilot
+npm install -g @github/copilot
 ```
+
+If your setup relies on shell initialization, restart VS Code after installation so new terminals inherit the updated environment.
 
 ### Nothing happens after clicking the button
 

@@ -3,7 +3,6 @@ import {
   FALLBACK_TERMINAL_NAME,
   buildExtensionSettingsQuery,
   buildTerminalName,
-  extractExecutable,
   normalizeCliCommand,
   normalizeTerminalName,
   resolveTerminalCwd,
