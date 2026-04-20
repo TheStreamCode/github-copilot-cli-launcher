@@ -1,9 +1,9 @@
-# GitHub Copilot CLI launcher
+# Copilot CLI Launcher
 
 [![CI](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A VS Code extension that opens GitHub Copilot CLI in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
+A VS Code extension that opens Copilot CLI in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
 
 Works on Windows, macOS, and Linux.
 
@@ -63,9 +63,9 @@ When the terminal runs, the extension checks command availability and surfaces g
 | Setting | Default | Description |
 | --- | --- | --- |
 | `copilotCliLauncher.cliCommand` | `copilot` | Command executed when the launcher button is clicked. |
-| `copilotCliLauncher.terminalName` | `GitHub Copilot CLI` | Base label used for the created terminal. |
+| `copilotCliLauncher.terminalName` | `Copilot CLI` | Base label used for the created terminal. |
 
-Open settings via the Command Palette: **GitHub Copilot CLI launcher: Open Settings**
+Open settings via the Command Palette: **Copilot CLI Launcher: Open Settings**
 
 **Examples:**
 
@@ -111,7 +111,7 @@ The launcher uses the workspace folder of the active editor. To control where Co
 
 ## Privacy
 
-GitHub Copilot CLI launcher does not collect telemetry, analytics, or personal data.
+Copilot CLI Launcher does not collect telemetry, analytics, or personal data.
 
 ## Development
 

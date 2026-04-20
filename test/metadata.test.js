@@ -37,26 +37,26 @@ function readPngSize(relativePath) {
   };
 }
 
-test('package metadata uses GitHub Copilot CLI launcher branding', () => {
+test('package metadata uses Copilot CLI Launcher branding', () => {
   const packageJson = readPackageJson();
 
-  assert.equal(packageJson.displayName, 'GitHub Copilot CLI launcher');
-  assert.equal(packageJson.description, 'Unofficial VS Code extension that opens GitHub Copilot CLI in a side terminal.');
+  assert.equal(packageJson.displayName, 'Copilot CLI Launcher');
+  assert.equal(packageJson.description, 'Unofficial VS Code extension that opens Copilot CLI in a side terminal.');
   assert.equal(packageJson.version, '0.1.2');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
-  assert.equal(packageJson.contributes.configuration.title, 'GitHub Copilot CLI launcher');
+  assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
 
   const [openCliCommand, openSettingsCommand] = packageJson.contributes.commands;
   assert.equal(openCliCommand.command, 'copilotCliLauncher.openCli');
-  assert.equal(openCliCommand.title, 'Open GitHub Copilot CLI in Side Terminal');
-  assert.equal(openCliCommand.category, 'GitHub Copilot CLI launcher');
+  assert.equal(openCliCommand.title, 'Open Copilot CLI in Side Terminal');
+  assert.equal(openCliCommand.category, 'Copilot CLI Launcher');
   assert.deepEqual(openCliCommand.icon, {
     light: './media/launcher-mark.svg',
     dark: './media/launcher-mark.svg',
   });
   assert.equal(openSettingsCommand.command, 'copilotCliLauncher.openSettings');
-  assert.equal(openSettingsCommand.category, 'GitHub Copilot CLI launcher');
+  assert.equal(openSettingsCommand.category, 'Copilot CLI Launcher');
   assert.equal(openSettingsCommand.title, 'Open Settings');
 });
 
@@ -68,7 +68,7 @@ test('package settings include cliCommand and terminalName', () => {
   assert.equal(properties['copilotCliLauncher.cliCommand'].default, 'copilot');
 
   assert.ok(properties['copilotCliLauncher.terminalName']);
-  assert.equal(properties['copilotCliLauncher.terminalName'].default, 'GitHub Copilot CLI');
+  assert.equal(properties['copilotCliLauncher.terminalName'].default, 'Copilot CLI');
 });
 
 test('extension assets keep Marketplace and command icons packaged on the expected paths', () => {
@@ -94,14 +94,14 @@ test('package scripts use deterministic local tooling entry points', () => {
 test('README is organized around user-facing setup, configuration, and troubleshooting', () => {
   const readme = readText('README.md');
 
-  assert.match(readme, /^# GitHub Copilot CLI launcher$/m);
-  assert.match(readme, /opens GitHub Copilot CLI in a new side terminal/i);
+  assert.match(readme, /^# Copilot CLI Launcher$/m);
+  assert.match(readme, /opens Copilot CLI in a new side terminal/i);
   assert.match(readme, /Works on Windows, macOS, and Linux\./);
   assert.match(readme, /This extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft\./);
   assert.match(readme, /## Features/);
   assert.match(readme, /## Configuration/);
   assert.match(readme, /## Troubleshooting/);
-  assert.match(readme, /GitHub Copilot CLI launcher: Open Settings/);
+  assert.match(readme, /Copilot CLI Launcher: Open Settings/);
   assert.match(readme, /gh extension install github\/gh-copilot/);
   assert.match(readme, /npm run package/);
   assert.match(readme, /uses the active editor/i);

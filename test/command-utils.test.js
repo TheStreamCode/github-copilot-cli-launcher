@@ -35,7 +35,7 @@ test('buildTerminalName appends the sequence after the first terminal', () => {
 });
 
 test('buildTerminalName falls back when the configured name is blank', () => {
-  assert.equal(buildTerminalName('   ', 2), 'GitHub Copilot CLI 2');
+  assert.equal(buildTerminalName('   ', 2), 'Copilot CLI 2');
 });
 
 // buildExtensionSettingsQuery

@@ -1,7 +1,7 @@
 {
   "name": "vscode-copilot-cli-launcher",
-  "displayName": "GitHub Copilot CLI launcher",
-  "description": "Unofficial VS Code extension that opens GitHub Copilot CLI in a side terminal.",
+  "displayName": "Copilot CLI Launcher",
+  "description": "Unofficial VS Code extension that opens Copilot CLI in a side terminal.",
   "publisher": "mikesoft",
   "version": "0.1.2",
   "repository": {
@@ -32,7 +32,6 @@
   "keywords": [
     "vscode",
     "extension",
-    "github",
     "copilot",
     "cli",
     "terminal",
@@ -46,8 +45,8 @@
     "commands": [
       {
         "command": "copilotCliLauncher.openCli",
-        "title": "Open GitHub Copilot CLI in Side Terminal",
-        "category": "GitHub Copilot CLI launcher",
+        "title": "Open Copilot CLI in Side Terminal",
+        "category": "Copilot CLI Launcher",
         "icon": {
           "light": "./media/launcher-mark.svg",
           "dark": "./media/launcher-mark.svg"
@@ -56,7 +55,7 @@
       {
         "command": "copilotCliLauncher.openSettings",
         "title": "Open Settings",
-        "category": "GitHub Copilot CLI launcher"
+        "category": "Copilot CLI Launcher"
       }
     ],
     "menus": {
@@ -68,16 +67,16 @@
       ]
     },
     "configuration": {
-      "title": "GitHub Copilot CLI launcher",
+      "title": "Copilot CLI Launcher",
       "properties": {
         "copilotCliLauncher.cliCommand": {
           "type": "string",
           "default": "copilot",
-          "markdownDescription": "Command used to start GitHub Copilot CLI."
+          "markdownDescription": "Command used to start Copilot CLI."
         },
         "copilotCliLauncher.terminalName": {
           "type": "string",
-          "default": "GitHub Copilot CLI",
+          "default": "Copilot CLI",
           "description": "Name of the terminal used by the launcher."
         }
       }

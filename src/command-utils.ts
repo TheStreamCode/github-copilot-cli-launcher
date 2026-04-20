@@ -1,5 +1,5 @@
 const FALLBACK_CLI_COMMAND = 'copilot';
-const FALLBACK_TERMINAL_NAME = 'GitHub Copilot CLI';
+const FALLBACK_TERMINAL_NAME = 'Copilot CLI';
 
 const GH_NOT_FOUND_PATTERNS = [
   /is not recognized as a name of a cmdlet/i,
