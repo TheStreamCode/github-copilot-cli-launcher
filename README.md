@@ -15,6 +15,7 @@ Works on Windows, macOS, and Linux.
 - **Toolbar launcher** — one-click button in the editor title area to start Copilot CLI
 - **Side-by-side terminal** — opens beside the active editor, never reusing existing terminals
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
+- **Install detection** — shows a guided warning when Copilot CLI is not installed, with a one-click install option
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
 - **Windows-ready** — supports quoted executable paths with spaces
 - **Privacy-first** — no telemetry, analytics, or personal data collection
@@ -55,6 +56,8 @@ Each launch creates a new terminal beside the current editor and sends the confi
 
 The launcher prefers the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder.
 
+If Copilot CLI is not installed, the extension shows a guided warning with a one-click option to open a terminal and run the install command.
+
 ## Configuration
 
 | Setting | Default | Description |
@@ -83,8 +86,6 @@ Windows executable path with spaces:
 ### `gh` is not recognized
 
 Install the GitHub CLI from [https://cli.github.com/](https://cli.github.com/) and confirm that `gh` works in a regular integrated terminal. If your setup relies on shell initialization, restart VS Code after installation so new terminals inherit the updated environment.
-
-The extension also shows a VS Code warning dialog to make the issue clearer.
 
 ### The gh-copilot extension is not installed
 

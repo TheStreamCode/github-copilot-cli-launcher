@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher');
   assert.equal(packageJson.description, 'Unofficial VS Code extension that opens Copilot CLI in a side terminal.');
-  assert.equal(packageJson.version, '0.1.4');
+  assert.equal(packageJson.version, '0.1.5');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -108,7 +108,6 @@ test('README is organized around user-facing setup, configuration, and troublesh
   assert.match(readme, /does not collect telemetry, analytics, or personal data/i);
   assert.doesNotMatch(readme, /launcher-mark\.svg/i);
   assert.doesNotMatch(readme, /media\/icon\.png/i);
-  assert.doesNotMatch(readme, /install detection/i);
 });
 
 test('SUPPORT explains when to use issues and when to contact the maintainer directly', () => {
@@ -142,6 +141,9 @@ test('changelog documents releases in Keep a Changelog format', () => {
   const changelog = readText('CHANGELOG.md');
 
   assert.match(changelog, /Keep a Changelog/i);
+  assert.match(changelog, /## \[0\.1\.5\]/s);
+  assert.match(changelog, /## \[0\.1\.4\]/s);
+  assert.match(changelog, /## \[0\.1\.3\]/s);
   assert.match(changelog, /## \[0\.1\.2\]/s);
   assert.match(changelog, /## \[0\.1\.1\]/s);
   assert.match(changelog, /## \[0\.1\.0\]/s);

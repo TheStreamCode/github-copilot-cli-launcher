@@ -3,10 +3,11 @@ const assert = require('node:assert/strict');
 
 const {
   normalizeCliCommand,
-  normalizeTerminalName,
   buildTerminalName,
   buildExtensionSettingsQuery,
   resolveTerminalCwd,
+  extractExecutable,
+  shouldPromptToInstallCopilot,
 } = require('../out/command-utils.js');
 
 // normalizeCliCommand
@@ -38,6 +39,40 @@ test('buildTerminalName falls back when the configured name is blank', () => {
 // buildExtensionSettingsQuery
 test('buildExtensionSettingsQuery targets the current extension id', () => {
   assert.equal(buildExtensionSettingsQuery('mikesoft.vscode-copilot-cli-launcher'), '@ext:mikesoft.vscode-copilot-cli-launcher');
+});
+
+// extractExecutable
+test('extractExecutable returns the first token for simple commands', () => {
+  assert.equal(extractExecutable('copilot'), 'copilot');
+});
+
+test('extractExecutable preserves quoted Windows paths with spaces', () => {
+  assert.equal(
+    extractExecutable('"C:\\Program Files\\GitHub CLI\\copilot.exe"'),
+    'C:\\Program Files\\GitHub CLI\\copilot.exe',
+  );
+});
+
+// shouldPromptToInstallCopilot
+test('shouldPromptToInstallCopilot detects PowerShell command-not-found output', () => {
+  const output = "copilot: The term 'copilot' is not recognized as a name of a cmdlet, function, script file, or executable program.";
+  assert.equal(shouldPromptToInstallCopilot('copilot', 1, output), true);
+});
+
+test('shouldPromptToInstallCopilot detects POSIX command-not-found exit code', () => {
+  assert.equal(shouldPromptToInstallCopilot('copilot', 127, ''), true);
+});
+
+test('shouldPromptToInstallCopilot detects bash command-not-found output', () => {
+  assert.equal(shouldPromptToInstallCopilot('copilot', 1, 'command not found: copilot'), true);
+});
+
+test('shouldPromptToInstallCopilot ignores unrelated runtime failures', () => {
+  assert.equal(shouldPromptToInstallCopilot('copilot', 1, 'Error: authentication required'), false);
+});
+
+test('shouldPromptToInstallCopilot ignores non-1 exit codes that are not 127', () => {
+  assert.equal(shouldPromptToInstallCopilot('copilot', 2, 'copilot: command not found'), false);
 });
 
 // resolveTerminalCwd

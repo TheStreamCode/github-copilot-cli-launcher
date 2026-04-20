@@ -4,11 +4,17 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.1.4]
+## [0.1.5]
+
+### Added
+
+- Install detection for Copilot CLI. Shows a guided warning with a one-click option to open a terminal and run `npm install -g @github/copilot`.
 
 ### Fixed
 
-- Fixed command not launching on first click when using `copilot` as the default command. The install detection logic was gated on the command starting with `gh`, which prevented the command from being sent to the terminal.
+- Fixed command not launching on first click when using `copilot` as the default command. The previous install detection logic was gated on the command starting with `gh`, which prevented the command from being sent to the terminal.
+
+## [0.1.4]
 
 ### Changed
 
