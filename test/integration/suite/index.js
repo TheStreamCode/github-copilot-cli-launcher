@@ -33,14 +33,14 @@ async function run() {
   const originalTerminalName = configuration.get('terminalName');
 
   try {
-    await configuration.update('cliCommand', 'gh copilot', vscode.ConfigurationTarget.Global);
-    await configuration.update('terminalName', 'GitHub Copilot CLI Test', vscode.ConfigurationTarget.Global);
+    await configuration.update('cliCommand', 'copilot', vscode.ConfigurationTarget.Global);
+    await configuration.update('terminalName', 'Copilot CLI Test', vscode.ConfigurationTarget.Global);
 
     const beforeCount = vscode.window.terminals.length;
     await vscode.commands.executeCommand('copilotCliLauncher.openCli');
     const terminal = await waitForNewTerminal(beforeCount);
 
-    assert.match(terminal.name, /^GitHub Copilot CLI Test/);
+    assert.match(terminal.name, /^Copilot CLI Test/);
     terminal.dispose();
 
     await vscode.commands.executeCommand('copilotCliLauncher.openSettings');
