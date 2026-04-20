@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher');
   assert.equal(packageJson.description, 'Unofficial VS Code extension that opens Copilot CLI in a side terminal.');
-  assert.equal(packageJson.version, '0.1.5');
+  assert.equal(packageJson.version, '0.1.6');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -141,6 +141,7 @@ test('changelog documents releases in Keep a Changelog format', () => {
   const changelog = readText('CHANGELOG.md');
 
   assert.match(changelog, /Keep a Changelog/i);
+  assert.match(changelog, /## \[0\.1\.6\]/s);
   assert.match(changelog, /## \[0\.1\.5\]/s);
   assert.match(changelog, /## \[0\.1\.4\]/s);
   assert.match(changelog, /## \[0\.1\.3\]/s);

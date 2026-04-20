@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.6]
+
+### Changed
+
+- Aligned README requirements and installation steps with the npm-based Copilot CLI (`@github/copilot`).
+- Simplified troubleshooting section to focus on Copilot CLI install detection.
+
 ## [0.1.5]
 
 ### Added
