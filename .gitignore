@@ -1,0 +1,14 @@
+node_modules/
+out/
+out/**/*.map
+.copilot/
+*.vsix
+*.tgz
+.vscode-test/
+.vsce/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+Screenshot_*.jpeg

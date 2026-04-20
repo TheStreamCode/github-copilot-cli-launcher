@@ -1,0 +1,104 @@
+{
+  "name": "vscode-copilot-cli-launcher",
+  "displayName": "GitHub Copilot CLI launcher",
+  "description": "Unofficial VS Code extension that opens GitHub Copilot CLI in a side terminal.",
+  "publisher": "mikesoft",
+  "version": "0.1.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher.git"
+  },
+  "author": {
+    "name": "Michael Gasperini",
+    "url": "https://mikesoft.it"
+  },
+  "bugs": {
+    "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher/issues"
+  },
+  "homepage": "https://mikesoft.it",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#0F172A",
+    "theme": "dark"
+  },
+  "pricing": "Free",
+  "engines": {
+    "vscode": "^1.86.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "vscode",
+    "extension",
+    "github",
+    "copilot",
+    "cli",
+    "terminal",
+    "launcher",
+    "toolbar",
+    "gh",
+    "ai"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "copilotCliLauncher.openCli",
+        "title": "Open GitHub Copilot CLI in Side Terminal",
+        "category": "GitHub Copilot CLI launcher",
+        "icon": {
+          "light": "./media/launcher-mark.svg",
+          "dark": "./media/launcher-mark.svg"
+        }
+      },
+      {
+        "command": "copilotCliLauncher.openSettings",
+        "title": "Open Settings",
+        "category": "GitHub Copilot CLI launcher"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "copilotCliLauncher.openCli",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "GitHub Copilot CLI launcher",
+      "properties": {
+        "copilotCliLauncher.cliCommand": {
+          "type": "string",
+          "default": "copilot",
+          "markdownDescription": "Command used to start GitHub Copilot CLI."
+        },
+        "copilotCliLauncher.terminalName": {
+          "type": "string",
+          "default": "GitHub Copilot CLI",
+          "description": "Name of the terminal used by the launcher."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
+    "watch": "node ./node_modules/typescript/bin/tsc --watch -p . --pretty false",
+    "test": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js",
+    "test:command-utils": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/command-utils.test.js",
+    "test:integration": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node ./test/integration/runTest.js",
+    "test:metadata": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/metadata.test.js",
+    "vscode:prepublish": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
+    "package": "node ./node_modules/@vscode/vsce/vsce package",
+    "check": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls"
+  },
+  "devDependencies": {
+    "@vscode/test-electron": "^2.5.2",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.86.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,158 @@
+import * as vscode from 'vscode';
+import {
+  FALLBACK_TERMINAL_NAME,
+  buildExtensionSettingsQuery,
+  buildTerminalName,
+  extractExecutable,
+  normalizeCliCommand,
+  normalizeTerminalName,
+  resolveTerminalCwd,
+  shouldPromptToInstallCopilotExtension,
+  shouldPromptToInstallGh,
+} from './command-utils.js';
+
+let terminalSequence = 1;
+const INSTALL_GH_URL = 'https://cli.github.com/';
+const INSTALL_COPILOT_COMMAND = 'gh extension install github/gh-copilot';
+
+function collectShellExecutionOutput(execution: vscode.TerminalShellExecution): Promise<string> {
+  return (async () => {
+    let output = '';
+
+    try {
+      for await (const chunk of execution.read()) {
+        output += chunk;
+      }
+    } catch {
+      return output;
+    }
+
+    return output;
+  })();
+}
+
+function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, context: vscode.ExtensionContext): void {
+  if (extractExecutable(cliCommand) !== 'gh') {
+    return;
+  }
+
+  let executionStarted = false;
+
+  const startExecution = (shellIntegration: vscode.TerminalShellIntegration) => {
+    if (executionStarted) {
+      return;
+    }
+
+    executionStarted = true;
+    shellIntegrationListener.dispose();
+    clearTimeout(fallbackHandle);
+
+    const execution = shellIntegration.executeCommand(cliCommand);
+    const outputPromise = collectShellExecutionOutput(execution);
+
+    const executionListener = vscode.window.onDidEndTerminalShellExecution(async (endEvent) => {
+      if (endEvent.terminal !== terminal || endEvent.execution !== execution) {
+        return;
+      }
+
+      executionListener.dispose();
+
+      const output = await outputPromise;
+      const { exitCode } = endEvent;
+
+      if (shouldPromptToInstallGh(cliCommand, exitCode, output)) {
+        const selection = await vscode.window.showWarningMessage(
+          `GitHub CLI (gh) does not seem to be installed. Download it from ${INSTALL_GH_URL}.`,
+          'Open Download Page',
+          'Open Settings',
+        );
+
+        if (selection === 'Open Download Page') {
+          await vscode.env.openExternal(vscode.Uri.parse(INSTALL_GH_URL));
+        } else if (selection === 'Open Settings') {
+          await vscode.commands.executeCommand('copilotCliLauncher.openSettings');
+        }
+
+        return;
+      }
+
+      if (shouldPromptToInstallCopilotExtension(cliCommand, exitCode, output)) {
+        const selection = await vscode.window.showWarningMessage(
+          `The GitHub Copilot CLI extension for gh does not seem to be installed. Install it with: ${INSTALL_COPILOT_COMMAND}.`,
+          'Open Settings',
+        );
+
+        if (selection === 'Open Settings') {
+          await vscode.commands.executeCommand('copilotCliLauncher.openSettings');
+        }
+      }
+    });
+
+    context.subscriptions.push(executionListener);
+  };
+
+  const shellIntegrationListener = vscode.window.onDidChangeTerminalShellIntegration(async (event) => {
+    if (event.terminal !== terminal) {
+      return;
+    }
+
+    startExecution(event.shellIntegration);
+  });
+
+  const fallbackHandle = setTimeout(() => {
+    if (terminal.shellIntegration) {
+      startExecution(terminal.shellIntegration);
+      return;
+    }
+
+    executionStarted = true;
+    shellIntegrationListener.dispose();
+    terminal.sendText(cliCommand, true);
+  }, 3000);
+
+  if (terminal.shellIntegration) {
+    startExecution(terminal.shellIntegration);
+    return;
+  }
+
+  context.subscriptions.push(
+    shellIntegrationListener,
+    { dispose: () => clearTimeout(fallbackHandle) },
+  );
+}
+
+export function activate(context: vscode.ExtensionContext): void {
+  const openCliCommand = vscode.commands.registerCommand('copilotCliLauncher.openCli', async () => {
+    const configuration = vscode.workspace.getConfiguration('copilotCliLauncher');
+    const cliCommand = normalizeCliCommand(configuration.get<string>('cliCommand', 'copilot'));
+    const configuredTerminalName = configuration.get<string>('terminalName', FALLBACK_TERMINAL_NAME);
+    const terminalBaseName = normalizeTerminalName(configuredTerminalName, FALLBACK_TERMINAL_NAME);
+    const terminalName = buildTerminalName(configuredTerminalName, terminalSequence, FALLBACK_TERMINAL_NAME);
+
+    if (!cliCommand) {
+      void vscode.window.showErrorMessage('Set "copilotCliLauncher.cliCommand" to the command that starts GitHub Copilot CLI.');
+      return;
+    }
+
+    terminalSequence += 1;
+    const cwd = resolveTerminalCwd(vscode.window.activeTextEditor, vscode.workspace);
+
+    const terminal = vscode.window.createTerminal({
+      name: terminalName,
+      location: { viewColumn: vscode.ViewColumn.Beside },
+      cwd,
+    });
+    terminal.show();
+    watchForMissingCopilot(terminal, cliCommand, context);
+    void vscode.window.setStatusBarMessage(`Started ${terminalBaseName}`, 2500);
+  });
+
+  const openSettingsCommand = vscode.commands.registerCommand('copilotCliLauncher.openSettings', async () => {
+    await vscode.commands.executeCommand('workbench.action.openSettings', buildExtensionSettingsQuery(context.extension.id));
+  });
+
+  context.subscriptions.push(openCliCommand, openSettingsCommand);
+}
+
+export function deactivate(): void {
+}
