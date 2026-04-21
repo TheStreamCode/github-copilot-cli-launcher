@@ -87,6 +87,7 @@ function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, c
 
     executionStarted = true;
     shellIntegrationListener.dispose();
+    terminal.sendText(cliCommand, true);
   }, 3000);
 
   if (terminal.shellIntegration) {
@@ -122,7 +123,6 @@ export function activate(context: vscode.ExtensionContext): void {
       cwd,
     });
     terminal.show();
-    terminal.sendText(cliCommand, true);
     watchForMissingCopilot(terminal, cliCommand, context);
     void vscode.window.setStatusBarMessage(`Started ${terminalBaseName}`, 2500);
   });
