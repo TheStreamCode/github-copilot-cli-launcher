@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.7]
+
+### Fixed
+
+- Removed duplicate command send that caused Copilot CLI to receive a second `copilot` message in the chat after initialization, consuming an extra premium request on every launch. The command is now sent exactly once through shell integration or the fallback path.
+
 ## [0.1.6]
 
 ### Changed
