@@ -7,6 +7,7 @@ const {
   buildExtensionSettingsQuery,
   resolveTerminalCwd,
   extractExecutable,
+  shouldOfferCopilotCliInstall,
   shouldPromptToInstallCopilot,
 } = require('../out/command-utils.js');
 
@@ -48,9 +49,20 @@ test('extractExecutable returns the first token for simple commands', () => {
 
 test('extractExecutable preserves quoted Windows paths with spaces', () => {
   assert.equal(
-    extractExecutable('"C:\\Program Files\\GitHub CLI\\copilot.exe"'),
-    'C:\\Program Files\\GitHub CLI\\copilot.exe',
+    extractExecutable('"C:\\Program Files\\GitHub Copilot\\copilot.exe"'),
+    'C:\\Program Files\\GitHub Copilot\\copilot.exe',
   );
+});
+
+// shouldOfferCopilotCliInstall
+test('shouldOfferCopilotCliInstall offers npm install for copilot executable commands', () => {
+  assert.equal(shouldOfferCopilotCliInstall('copilot'), true);
+  assert.equal(shouldOfferCopilotCliInstall('copilot --help'), true);
+});
+
+test('shouldOfferCopilotCliInstall does not offer npm install for different configured executables', () => {
+  assert.equal(shouldOfferCopilotCliInstall('custom-copilot-agent'), false);
+  assert.equal(shouldOfferCopilotCliInstall('"C:\\Program Files\\Custom Agent\\agent.exe"'), false);
 });
 
 // shouldPromptToInstallCopilot
@@ -65,6 +77,14 @@ test('shouldPromptToInstallCopilot detects POSIX command-not-found exit code', (
 
 test('shouldPromptToInstallCopilot detects bash command-not-found output', () => {
   assert.equal(shouldPromptToInstallCopilot('copilot', 1, 'command not found: copilot'), true);
+});
+
+test('shouldPromptToInstallCopilot detects the missing executable from a custom command', () => {
+  assert.equal(shouldPromptToInstallCopilot('custom-copilot-agent', 1, 'custom-copilot-agent: command not found'), true);
+});
+
+test('shouldPromptToInstallCopilot ignores copilot-looking output for a different configured executable', () => {
+  assert.equal(shouldPromptToInstallCopilot('custom-copilot-agent', 1, 'copilot: command not found'), false);
 });
 
 test('shouldPromptToInstallCopilot ignores unrelated runtime failures', () => {

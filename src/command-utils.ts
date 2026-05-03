@@ -1,24 +1,43 @@
 const FALLBACK_CLI_COMMAND = 'copilot';
 const FALLBACK_TERMINAL_NAME = 'Copilot CLI';
 
-const COPILOT_NOT_FOUND_PATTERNS = [
-  /is not recognized as a name of a cmdlet/i,
-  /(?:^|\s)copilot:\s+command not found/i,
-  /(?:^|\s)copilot: not found/i,
-  /command not found:\s*copilot/i,
-  /\bcopilot\b.*not found/i,
-  /no such file or directory/i,
-  /cannot find the file/i,
-  /ERR! could not resolve/i,
-  /ERR! not found/i,
-];
-
 type WorkspaceFolderLike<T> = { uri: T };
 type WorkspaceLike<T> = {
   workspaceFolders?: readonly WorkspaceFolderLike<T>[];
   getWorkspaceFolder(uri: T): WorkspaceFolderLike<T> | undefined;
 };
 type ActiveEditorLike<T> = { document: { uri: T } };
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getExecutableBaseName(command: string): string {
+  const executable = extractExecutable(command);
+  const fileName = executable.split(/[\\/]/).pop() ?? executable;
+
+  return fileName.replace(/\.(?:exe|cmd|bat|ps1)$/i, '');
+}
+
+function buildCommandNotFoundPatterns(command: string): RegExp[] {
+  const executableName = getExecutableBaseName(command);
+
+  if (!executableName) {
+    return [];
+  }
+
+  const escapedName = escapeRegExp(executableName);
+
+  return [
+    new RegExp(`(?:^|\\s)${escapedName}:\\s+command not found`, 'i'),
+    new RegExp(`(?:^|\\s)${escapedName}:\\s+not found`, 'i'),
+    new RegExp(`command not found:\\s*${escapedName}`, 'i'),
+    new RegExp(`unknown command:?\\s*${escapedName}`, 'i'),
+    new RegExp(`['"]?${escapedName}['"]?.*is not recognized`, 'i'),
+    new RegExp(`\\b${escapedName}\\b.*not found`, 'i'),
+    new RegExp(`\\b${escapedName}\\b.*cannot find the file`, 'i'),
+  ];
+}
 
 /** Returns a trimmed CLI command with a safe fallback. */
 export function normalizeCliCommand(value: string | undefined, fallback = FALLBACK_CLI_COMMAND): string {
@@ -63,6 +82,11 @@ export function extractExecutable(command: string): string {
   return whitespaceIndex === -1 ? normalized : normalized.slice(0, whitespaceIndex);
 }
 
+/** Returns whether the configured command is the npm-installed Copilot CLI executable. */
+export function shouldOfferCopilotCliInstall(command: string): boolean {
+  return getExecutableBaseName(command).toLowerCase() === FALLBACK_CLI_COMMAND;
+}
+
 /** Returns whether a terminal failure likely means the copilot CLI is missing. */
 export function shouldPromptToInstallCopilot(command: string, exitCode: number | undefined, output: string): boolean {
   if (exitCode === 127) {
@@ -73,7 +97,7 @@ export function shouldPromptToInstallCopilot(command: string, exitCode: number |
     return false;
   }
 
-  return COPILOT_NOT_FOUND_PATTERNS.some((pattern) => pattern.test(output));
+  return buildCommandNotFoundPatterns(command).some((pattern) => pattern.test(output));
 }
 
 /** Resolves the terminal cwd from the active editor or the first workspace folder. */

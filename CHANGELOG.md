@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.8]
+
+### Changed
+
+- Clarified documentation around the standalone GitHub Copilot CLI coding agent launched with the `copilot` command.
+- Removed stale references to unrelated CLI tooling from README, docs, changelog, package keywords, and tests.
+
+### Fixed
+
+- Made missing-command detection respect the configured executable instead of matching only `copilot` output.
+- Avoided suggesting the npm Copilot CLI install command when a different custom executable is configured.
+- Updated development dependency lockfile to resolve the moderate `uuid` audit finding inherited through release tooling.
+
 ## [0.1.7]
 
 ### Fixed
@@ -25,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- Fixed command not launching on first click when using `copilot` as the default command. The previous install detection logic was gated on the command starting with `gh`, which prevented the command from being sent to the terminal.
+- Fixed command not launching on first click when using `copilot` as the default command.
 
 ## [0.1.4]
 
@@ -38,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Renamed from "GitHub Copilot CLI launcher" to "Copilot CLI Launcher" for trademark safety.
-- Changed the default CLI command from `gh copilot` to `copilot`.
+- Changed the default CLI command to `copilot`.
 - Changed the default terminal name from "GitHub Copilot CLI" to "Copilot CLI".
 
 ## [0.1.2]

@@ -6,6 +6,7 @@ import {
   normalizeCliCommand,
   normalizeTerminalName,
   resolveTerminalCwd,
+  shouldOfferCopilotCliInstall,
   shouldPromptToInstallCopilot,
 } from './command-utils.js';
 
@@ -52,6 +53,22 @@ function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, c
       const { exitCode } = endEvent;
 
       if (shouldPromptToInstallCopilot(cliCommand, exitCode, output)) {
+        if (!shouldOfferCopilotCliInstall(cliCommand)) {
+          const selection = await vscode.window.showWarningMessage(
+            `The configured Copilot CLI command could not be started: ${cliCommand}.`,
+            'Open Settings',
+          );
+
+          if (selection === 'Open Settings') {
+            await vscode.commands.executeCommand(
+              'workbench.action.openSettings',
+              buildExtensionSettingsQuery(context.extension.id),
+            );
+          }
+
+          return;
+        }
+
         const selection = await vscode.window.showWarningMessage(
           `Copilot CLI does not seem to be installed. Install it with: ${INSTALL_COPILOT_COMMAND}.`,
           'Open Install Terminal',

@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher');
   assert.equal(packageJson.description, 'Unofficial VS Code extension that opens Copilot CLI in a side terminal.');
-  assert.equal(packageJson.version, '0.1.7');
+  assert.equal(packageJson.version, '0.1.8');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -95,7 +95,7 @@ test('README is organized around user-facing setup, configuration, and troublesh
   const readme = readText('README.md');
 
   assert.match(readme, /^# Copilot CLI Launcher$/m);
-  assert.match(readme, /opens Copilot CLI in a new side terminal/i);
+  assert.match(readme, /opens the standalone GitHub Copilot CLI coding agent in a new side terminal/i);
   assert.match(readme, /Works on Windows, macOS, and Linux\./);
   assert.match(readme, /This extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft\./);
   assert.match(readme, /## Features/);

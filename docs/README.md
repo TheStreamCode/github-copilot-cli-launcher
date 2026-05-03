@@ -7,7 +7,7 @@ This directory contains engineering documents for the repository. End-user insta
 - `specs/`: scoped design documents for engineering changes
 - `plans/`: implementation plans and historical execution notes
 
-Current release focuses on one-click GitHub Copilot CLI launch from the editor toolbar and install detection for both the `gh` binary and the `gh-copilot` extension.
+Current release focuses on one-click GitHub Copilot CLI launch from the editor toolbar and install detection for the standalone `copilot` command.
 
 ## Document Status
 

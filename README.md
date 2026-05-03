@@ -3,7 +3,7 @@
 [![CI](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A VS Code extension that opens Copilot CLI in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
+A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
 
 Works on Windows, macOS, and Linux.
 
@@ -23,17 +23,19 @@ Works on Windows, macOS, and Linux.
 ## Requirements
 
 - VS Code `^1.86.0`
-- Copilot CLI installed (`npm install -g @github/copilot`)
+- GitHub Copilot CLI installed and available as `copilot` (`npm install -g @github/copilot`)
 
 ## Installation
 
 1. **Install the extension** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher).
 
-2. **Install Copilot CLI:**
+2. **Install GitHub Copilot CLI:**
 
    ```bash
    npm install -g @github/copilot
    ```
+
+   GitHub also supports WinGet on Windows and Homebrew on macOS/Linux; keep `copilotCliLauncher.cliCommand` set to the command or executable path that launches the standalone `copilot` CLI.
 
 3. Open any file in VS Code and click the launcher button in the editor title.
 
@@ -43,7 +45,7 @@ Each launch creates a new terminal beside the current editor and sends the confi
 
 The launcher prefers the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder.
 
-If Copilot CLI is not installed, the extension shows a guided warning with a one-click option to open a terminal and run the install command.
+If the default `copilot` command is not installed, the extension shows a guided warning with a one-click option to open a terminal and run the npm install command. If a custom executable is configured and cannot be started, the extension opens its settings instead.
 
 ## Configuration
 
@@ -65,7 +67,7 @@ Default command:
 Windows executable path with spaces:
 
 ```json
-"copilotCliLauncher.cliCommand": "\"C:\\Program Files\\GitHub CLI\\gh.exe\" copilot"
+"copilotCliLauncher.cliCommand": "\"C:\\Program Files\\GitHub Copilot\\copilot.exe\""
 ```
 
 ## Troubleshooting
@@ -86,7 +88,7 @@ Check the value of `copilotCliLauncher.cliCommand` in settings and verify that t
 
 ### Custom executable path on Windows
 
-Quote executable paths that contain spaces, for example: `"C:\Program Files\GitHub CLI\gh.exe" copilot`.
+Quote executable paths that contain spaces, for example: `"C:\Program Files\GitHub Copilot\copilot.exe"`.
 
 ### Multi-root workspaces
 
