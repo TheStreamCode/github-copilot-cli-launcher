@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.9]
+
+### Changed
+
+- Refreshed the Marketplace icon and editor toolbar launcher mark assets for the extension package.
+- Updated documentation to note the packaged visual assets used by the current release.
+
 ## [0.1.8]
 
 ### Changed

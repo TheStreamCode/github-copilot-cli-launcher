@@ -17,6 +17,7 @@ Works on Windows, macOS, and Linux.
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
 - **Install detection** — shows a guided warning when Copilot CLI is not installed, with a one-click install option
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
+- **Marketplace-ready visuals** — refreshed icon and toolbar mark are bundled with the extension package
 - **Windows-ready** — supports quoted executable paths with spaces
 - **Privacy-first** — no telemetry, analytics, or personal data collection
 
