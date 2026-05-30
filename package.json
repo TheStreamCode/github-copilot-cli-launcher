@@ -3,7 +3,7 @@
   "displayName": "Copilot CLI Launcher",
   "description": "Unofficial VS Code extension that opens Copilot CLI in a side terminal.",
   "publisher": "mikesoft",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher.git"
@@ -25,6 +25,15 @@
   "pricing": "Free",
   "engines": {
     "vscode": "^1.86.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Launching Copilot CLI runs terminal commands in the current workspace. The launcher is disabled until the workspace is trusted.",
+      "restrictedConfigurations": [
+        "copilotCliLauncher.cliCommand"
+      ]
+    }
   },
   "categories": [
     "Other"
@@ -70,13 +79,21 @@
       "properties": {
         "copilotCliLauncher.cliCommand": {
           "type": "string",
+          "scope": "machine",
           "default": "copilot",
-          "markdownDescription": "Command used to start Copilot CLI."
+          "markdownDescription": "Command used to start Copilot CLI. The default is `copilot`. On Windows, quote executable paths that contain spaces, for example `\"C:\\Program Files\\GitHub Copilot\\copilot.exe\"`."
         },
         "copilotCliLauncher.terminalName": {
           "type": "string",
+          "scope": "window",
           "default": "Copilot CLI",
-          "description": "Name of the terminal used by the launcher."
+          "description": "Base name of the terminal used by the launcher."
+        },
+        "copilotCliLauncher.autoInstall": {
+          "type": "boolean",
+          "scope": "machine",
+          "default": true,
+          "description": "Offer to install GitHub Copilot CLI automatically when the default copilot command is not found. Installation only starts after explicit confirmation."
         }
       }
     }

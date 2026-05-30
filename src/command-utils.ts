@@ -7,6 +7,10 @@ type WorkspaceLike<T> = {
   getWorkspaceFolder(uri: T): WorkspaceFolderLike<T> | undefined;
 };
 type ActiveEditorLike<T> = { document: { uri: T } };
+type ConfigurationInspectionLike<T> = {
+  defaultValue?: T;
+  globalValue?: T;
+};
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -42,6 +46,18 @@ function buildCommandNotFoundPatterns(command: string): RegExp[] {
 /** Returns a trimmed CLI command with a safe fallback. */
 export function normalizeCliCommand(value: string | undefined, fallback = FALLBACK_CLI_COMMAND): string {
   return (value ?? fallback).trim();
+}
+
+/** Resolves launch command from user-level configuration only, ignoring workspace-controlled values. */
+export function resolveCliCommandSetting(
+  inspection: ConfigurationInspectionLike<string> | undefined,
+  fallback = FALLBACK_CLI_COMMAND,
+): string {
+  const value = inspection?.globalValue !== undefined
+    ? inspection.globalValue
+    : inspection?.defaultValue ?? fallback;
+
+  return normalizeCliCommand(value, fallback);
 }
 
 /** Returns the configured terminal base name without any numeric suffix. */

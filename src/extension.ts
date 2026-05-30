@@ -1,33 +1,65 @@
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import {
   FALLBACK_TERMINAL_NAME,
   buildExtensionSettingsQuery,
   buildTerminalName,
-  normalizeCliCommand,
   normalizeTerminalName,
+  resolveCliCommandSetting,
   resolveTerminalCwd,
   shouldOfferCopilotCliInstall,
   shouldPromptToInstallCopilot,
 } from './command-utils.js';
+import {
+  buildCopilotInstallPromptCommand,
+  buildCopilotInstallPromptMessage,
+  buildCopilotInstallPromptScript,
+} from './install-utils.js';
+
+const SETTINGS_NAMESPACE = 'copilotCliLauncher';
+const COPILOT_DOCS_URL = 'https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli';
 
 let terminalSequence = 1;
-const INSTALL_COPILOT_COMMAND = 'npm install -g @github/copilot';
 
 function collectShellExecutionOutput(execution: vscode.TerminalShellExecution): Promise<string> {
   return (async () => {
     let output = '';
+
     try {
       for await (const chunk of execution.read()) {
         output += chunk;
       }
     } catch {
-      // best-effort; ignore read errors
+      return output;
     }
+
     return output;
   })();
 }
 
-function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, context: vscode.ExtensionContext): void {
+function writeCopilotInstallPromptScript(): string {
+  const scriptPath = path.join(os.tmpdir(), `copilot-cli-launcher-install-${process.pid}-${Date.now()}.js`);
+  fs.writeFileSync(scriptPath, buildCopilotInstallPromptScript(), 'utf8');
+
+  return scriptPath;
+}
+
+async function openExtensionSettings(context: vscode.ExtensionContext): Promise<void> {
+  await vscode.commands.executeCommand('workbench.action.openSettings', buildExtensionSettingsQuery(context.extension.id));
+}
+
+async function openCopilotInstallInstructions(): Promise<void> {
+  await vscode.env.openExternal(vscode.Uri.parse(COPILOT_DOCS_URL));
+}
+
+function executeCommandWithOptionalShellIntegration(
+  terminal: vscode.Terminal,
+  command: string,
+  context: vscode.ExtensionContext,
+  onShellExecutionEnd?: (event: vscode.TerminalShellExecutionEndEvent, output: string) => void | Promise<void>,
+): void {
   let executionStarted = false;
 
   const startExecution = (shellIntegration: vscode.TerminalShellIntegration) => {
@@ -39,56 +71,30 @@ function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, c
     shellIntegrationListener.dispose();
     clearTimeout(fallbackHandle);
 
-    const execution = shellIntegration.executeCommand(cliCommand);
-    const outputPromise = collectShellExecutionOutput(execution);
+    let execution: vscode.TerminalShellExecution | undefined;
+    let outputPromise: Promise<string> | undefined;
 
-    const executionListener = vscode.window.onDidEndTerminalShellExecution(async (endEvent) => {
-      if (endEvent.terminal !== terminal || endEvent.execution !== execution) {
-        return;
-      }
-
-      executionListener.dispose();
-
-      const output = await outputPromise;
-      const { exitCode } = endEvent;
-
-      if (shouldPromptToInstallCopilot(cliCommand, exitCode, output)) {
-        if (!shouldOfferCopilotCliInstall(cliCommand)) {
-          const selection = await vscode.window.showWarningMessage(
-            `The configured Copilot CLI command could not be started: ${cliCommand}.`,
-            'Open Settings',
-          );
-
-          if (selection === 'Open Settings') {
-            await vscode.commands.executeCommand(
-              'workbench.action.openSettings',
-              buildExtensionSettingsQuery(context.extension.id),
-            );
-          }
-
+    const executionListener = onShellExecutionEnd
+      ? vscode.window.onDidEndTerminalShellExecution(async (endEvent) => {
+        if (endEvent.terminal !== terminal || (execution && endEvent.execution !== execution)) {
           return;
         }
 
-        const selection = await vscode.window.showWarningMessage(
-          `Copilot CLI does not seem to be installed. Install it with: ${INSTALL_COPILOT_COMMAND}.`,
-          'Open Install Terminal',
-        );
+        executionListener?.dispose();
+        const output = outputPromise ? await outputPromise : '';
+        await onShellExecutionEnd(endEvent, output);
+      })
+      : undefined;
 
-        if (selection === 'Open Install Terminal') {
-          const installTerminal = vscode.window.createTerminal({
-            name: 'Install Copilot CLI',
-            location: vscode.TerminalLocation.Panel,
-          });
-          installTerminal.show();
-          installTerminal.sendText(INSTALL_COPILOT_COMMAND, true);
-        }
-      }
-    });
+    if (executionListener) {
+      context.subscriptions.push(executionListener);
+    }
 
-    context.subscriptions.push(executionListener);
+    execution = shellIntegration.executeCommand(command);
+    outputPromise = collectShellExecutionOutput(execution);
   };
 
-  const shellIntegrationListener = vscode.window.onDidChangeTerminalShellIntegration(async (event) => {
+  const shellIntegrationListener = vscode.window.onDidChangeTerminalShellIntegration((event) => {
     if (event.terminal !== terminal) {
       return;
     }
@@ -104,7 +110,7 @@ function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, c
 
     executionStarted = true;
     shellIntegrationListener.dispose();
-    terminal.sendText(cliCommand, true);
+    terminal.sendText(command, true);
   }, 3000);
 
   if (terminal.shellIntegration) {
@@ -118,10 +124,100 @@ function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, c
   );
 }
 
+function startGuidedInstall(context: vscode.ExtensionContext): void {
+  const installTerminal = vscode.window.createTerminal({
+    name: 'Install GitHub Copilot CLI',
+    location: vscode.TerminalLocation.Panel,
+  });
+  const installCommand = buildCopilotInstallPromptCommand(writeCopilotInstallPromptScript());
+
+  installTerminal.show();
+  executeCommandWithOptionalShellIntegration(installTerminal, installCommand, context);
+}
+
+async function handleMissingCopilot(context: vscode.ExtensionContext, cliCommand: string): Promise<void> {
+  if (!shouldOfferCopilotCliInstall(cliCommand)) {
+    const selection = await vscode.window.showWarningMessage(
+      `The configured Copilot CLI command could not be started: ${cliCommand}.`,
+      'Open Settings',
+    );
+
+    if (selection === 'Open Settings') {
+      await openExtensionSettings(context);
+    }
+
+    return;
+  }
+
+  const configuration = vscode.workspace.getConfiguration(SETTINGS_NAMESPACE);
+  const autoInstall = configuration.get<boolean>('autoInstall', true);
+
+  if (!autoInstall) {
+    const selection = await vscode.window.showWarningMessage(
+      `${buildCopilotInstallPromptMessage()} Install it manually or enable guided install in settings.`,
+      'Open Settings',
+      'Open GitHub Docs',
+    );
+
+    if (selection === 'Open Settings') {
+      await openExtensionSettings(context);
+    } else if (selection === 'Open GitHub Docs') {
+      await openCopilotInstallInstructions();
+    }
+
+    return;
+  }
+
+  const selection = await vscode.window.showWarningMessage(
+    `${buildCopilotInstallPromptMessage()} Install it now with npm?`,
+    { modal: true },
+    'Install',
+    'Open GitHub Docs',
+    'Open Settings',
+  );
+
+  if (selection === 'Install') {
+    startGuidedInstall(context);
+  } else if (selection === 'Open GitHub Docs') {
+    await openCopilotInstallInstructions();
+  } else if (selection === 'Open Settings') {
+    await openExtensionSettings(context);
+  }
+}
+
+function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, context: vscode.ExtensionContext): void {
+  executeCommandWithOptionalShellIntegration(
+    terminal,
+    cliCommand,
+    context,
+    async (endEvent, output) => {
+      if (shouldPromptToInstallCopilot(cliCommand, endEvent.exitCode, output)) {
+        await handleMissingCopilot(context, cliCommand);
+      }
+    },
+  );
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   const openCliCommand = vscode.commands.registerCommand('copilotCliLauncher.openCli', async () => {
-    const configuration = vscode.workspace.getConfiguration('copilotCliLauncher');
-    const cliCommand = normalizeCliCommand(configuration.get<string>('cliCommand', 'copilot'));
+    if (!vscode.workspace.isTrusted) {
+      const selection = await vscode.window.showWarningMessage(
+        'Copilot CLI Launcher runs terminal commands in the current workspace. Trust this workspace before launching Copilot CLI.',
+        'Manage Workspace Trust',
+        'Open Settings',
+      );
+
+      if (selection === 'Manage Workspace Trust') {
+        await vscode.commands.executeCommand('workbench.trust.manage');
+      } else if (selection === 'Open Settings') {
+        await openExtensionSettings(context);
+      }
+
+      return;
+    }
+
+    const configuration = vscode.workspace.getConfiguration(SETTINGS_NAMESPACE);
+    const cliCommand = resolveCliCommandSetting(configuration.inspect<string>('cliCommand'), 'copilot');
     const configuredTerminalName = configuration.get<string>('terminalName', FALLBACK_TERMINAL_NAME);
     const terminalBaseName = normalizeTerminalName(configuredTerminalName, FALLBACK_TERMINAL_NAME);
     const terminalName = buildTerminalName(configuredTerminalName, terminalSequence, FALLBACK_TERMINAL_NAME);
@@ -145,7 +241,7 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   const openSettingsCommand = vscode.commands.registerCommand('copilotCliLauncher.openSettings', async () => {
-    await vscode.commands.executeCommand('workbench.action.openSettings', buildExtensionSettingsQuery(context.extension.id));
+    await openExtensionSettings(context);
   });
 
   context.subscriptions.push(openCliCommand, openSettingsCommand);

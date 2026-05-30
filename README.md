@@ -15,7 +15,7 @@ Works on Windows, macOS, and Linux.
 - **Toolbar launcher** — one-click button in the editor title area to start Copilot CLI
 - **Side-by-side terminal** — opens beside the active editor, never reusing existing terminals
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
-- **Install detection** — shows a guided warning when Copilot CLI is not installed, with a one-click install option
+- **Guided installation** — offers a consent-based install flow when the default `copilot` command is missing
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
 - **Marketplace-ready visuals** — refreshed icon and toolbar mark are bundled with the extension package
 - **Windows-ready** — supports quoted executable paths with spaces
@@ -40,13 +40,32 @@ Works on Windows, macOS, and Linux.
 
 3. Open any file in VS Code and click the launcher button in the editor title.
 
+## Guided Installation
+
+If the default `copilot` command is missing, the extension shows a guided warning with options to install GitHub Copilot CLI, open the GitHub documentation, or open the extension settings.
+
+Choosing **Install** opens a visible terminal and runs a generated prompt script. Installation only starts after explicit confirmation:
+
+```text
+GitHub Copilot CLI was not found.
+Install GitHub Copilot CLI now? (y/N):
+```
+
+Answer `y` or `yes` to run:
+
+```bash
+npm install -g @github/copilot
+```
+
+Any other answer cancels installation. GitHub also documents WinGet, Homebrew, and install-script alternatives if npm is not your preferred setup path.
+
 ## How It Works
 
 Each launch creates a new terminal beside the current editor and sends the configured command immediately. Existing terminals are never reused.
 
 The launcher prefers the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder.
 
-If the default `copilot` command is not installed, the extension shows a guided warning with a one-click option to open a terminal and run the npm install command. If a custom executable is configured and cannot be started, the extension opens its settings instead.
+If the default `copilot` command is not installed, the extension shows the guided installation flow. If a custom executable is configured and cannot be started, the extension opens its settings instead.
 
 ## Configuration
 
@@ -54,6 +73,7 @@ If the default `copilot` command is not installed, the extension shows a guided 
 | --- | --- | --- |
 | `copilotCliLauncher.cliCommand` | `copilot` | Command executed when the launcher button is clicked. |
 | `copilotCliLauncher.terminalName` | `Copilot CLI` | Base label used for the created terminal. |
+| `copilotCliLauncher.autoInstall` | `true` | Offer guided installation when the default `copilot` command is missing. |
 
 Open settings via the Command Palette: **Copilot CLI Launcher: Open Settings**
 

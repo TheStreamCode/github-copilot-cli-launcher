@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0]
+
+### Added
+
+- Added a consent-based guided install flow that asks for explicit confirmation before running `npm install -g @github/copilot`.
+- Added `copilotCliLauncher.autoInstall` to allow disabling guided installation prompts.
+- Added workspace trust metadata and machine/window scoped configuration.
+
+### Changed
+
+- Updated README setup and troubleshooting docs to describe the current guided install flow.
+
 ## [0.1.9]
 
 ### Changed

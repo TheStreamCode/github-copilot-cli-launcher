@@ -7,6 +7,7 @@ const {
   buildExtensionSettingsQuery,
   resolveTerminalCwd,
   extractExecutable,
+  resolveCliCommandSetting,
   shouldOfferCopilotCliInstall,
   shouldPromptToInstallCopilot,
 } = require('../out/command-utils.js');
@@ -22,6 +23,16 @@ test('normalizeCliCommand falls back when value is undefined', () => {
 
 test('normalizeCliCommand preserves the blank command path for validation', () => {
   assert.equal(normalizeCliCommand('   '), '');
+});
+
+test('resolveCliCommandSetting ignores workspace-controlled values', () => {
+  assert.equal(
+    resolveCliCommandSetting({
+      defaultValue: 'copilot',
+      globalValue: 'copilot --help',
+    }),
+    'copilot --help',
+  );
 });
 
 // buildTerminalName

@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher');
   assert.equal(packageJson.description, 'Unofficial VS Code extension that opens Copilot CLI in a side terminal.');
-  assert.equal(packageJson.version, '0.1.9');
+  assert.equal(packageJson.version, '0.2.0');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -66,9 +66,19 @@ test('package settings include cliCommand and terminalName', () => {
 
   assert.ok(properties['copilotCliLauncher.cliCommand']);
   assert.equal(properties['copilotCliLauncher.cliCommand'].default, 'copilot');
+  assert.equal(properties['copilotCliLauncher.cliCommand'].scope, 'machine');
 
   assert.ok(properties['copilotCliLauncher.terminalName']);
   assert.equal(properties['copilotCliLauncher.terminalName'].default, 'Copilot CLI');
+  assert.equal(properties['copilotCliLauncher.terminalName'].scope, 'window');
+
+  assert.ok(properties['copilotCliLauncher.autoInstall']);
+  assert.equal(properties['copilotCliLauncher.autoInstall'].default, true);
+  assert.equal(properties['copilotCliLauncher.autoInstall'].scope, 'machine');
+  assert.match(properties['copilotCliLauncher.autoInstall'].description, /explicit confirmation/i);
+  assert.deepEqual(packageJson.capabilities.untrustedWorkspaces.restrictedConfigurations, [
+    'copilotCliLauncher.cliCommand',
+  ]);
 });
 
 test('extension assets keep Marketplace and command icons packaged on the expected paths', () => {
@@ -99,10 +109,12 @@ test('README is organized around user-facing setup, configuration, and troublesh
   assert.match(readme, /Works on Windows, macOS, and Linux\./);
   assert.match(readme, /This extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft\./);
   assert.match(readme, /## Features/);
+  assert.match(readme, /## Guided Installation/);
   assert.match(readme, /## Configuration/);
   assert.match(readme, /## Troubleshooting/);
   assert.match(readme, /Copilot CLI Launcher: Open Settings/);
   assert.match(readme, /npm install -g @github\/copilot/);
+  assert.match(readme, /explicit confirmation/i);
   assert.match(readme, /npm run package/);
   assert.match(readme, /uses the active editor/i);
   assert.match(readme, /does not collect telemetry, analytics, or personal data/i);
@@ -141,6 +153,7 @@ test('changelog documents releases in Keep a Changelog format', () => {
   const changelog = readText('CHANGELOG.md');
 
   assert.match(changelog, /Keep a Changelog/i);
+  assert.match(changelog, /## \[0\.2\.0\][\s\S]*guided install flow/s);
   assert.match(changelog, /## \[0\.1\.7\]/s);
   assert.match(changelog, /## \[0\.1\.6\]/s);
   assert.match(changelog, /## \[0\.1\.5\]/s);
