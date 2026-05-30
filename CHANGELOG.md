@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.1]
+
+### Changed
+
+- Restored the original Marketplace and toolbar artwork after the 0.2.0 guided install update.
+- Rebuilt the VSIX package with the restored bundled visual assets.
+
 ## [0.2.0]
 
 ### Added

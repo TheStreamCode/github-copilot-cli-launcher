@@ -119,6 +119,8 @@ The launcher uses the workspace folder of the active editor. To control where Co
 
 Copilot CLI Launcher does not collect telemetry, analytics, or personal data.
 
+The extension ships its bundled visual assets inside the VSIX package and does not fetch remote images at runtime.
+
 ## Development
 
 ```bash
