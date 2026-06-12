@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.3]
+
+### Changed
+
+- Unified the `LICENSE` copyright holder to **Michael Gasperini (Mikesoft)** and corrected the copyright year to 2026. No functional changes.
+
 ## [0.2.2]
 
 ### Changed
