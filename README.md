@@ -29,7 +29,7 @@ Works on Windows, macOS, and Linux.
 
 ## Requirements
 
-- VS Code `^1.86.0`
+- VS Code `^1.93.0`
 - GitHub Copilot CLI installed and available as `copilot` (`npm install -g @github/copilot`)
 
 ## Installation

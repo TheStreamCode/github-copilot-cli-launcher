@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.4]
+
+### Added
+
+- Added `CONTRIBUTING.md`, `SECURITY.md`, and `TRADEMARKS.md` governance documents for the public repository.
+- Added `test:unit` and `test:install-utils` npm scripts to match the rest of the launcher family.
+
+### Changed
+
+- Raised the minimum required VS Code version to `^1.93.0`, the actual floor for the terminal shell integration APIs the launcher uses (previously declared `^1.86.0`).
+- Compiled against the `ES2022` target to align with the rest of the launcher family.
+
 ## [0.2.3]
 
 ### Changed

@@ -3,7 +3,7 @@
   "displayName": "Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal",
   "description": "Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal, guided install. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.",
   "publisher": "mikesoft",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher.git"
@@ -27,7 +27,7 @@
   },
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": "^1.93.0"
   },
   "capabilities": {
     "untrustedWorkspaces": {
@@ -110,7 +110,9 @@
     "compile": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
     "watch": "node ./node_modules/typescript/bin/tsc --watch -p . --pretty false",
     "test": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js",
+    "test:unit": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js",
     "test:command-utils": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/command-utils.test.js",
+    "test:install-utils": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/install-utils.test.js",
     "test:integration": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node ./test/integration/runTest.js",
     "test:metadata": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/metadata.test.js",
     "vscode:prepublish": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
@@ -120,7 +122,7 @@
   "devDependencies": {
     "@vscode/test-electron": "^2.5.2",
     "@types/node": "^22.0.0",
-    "@types/vscode": "^1.86.0",
+    "@types/vscode": "^1.93.0",
     "@vscode/vsce": "^3.0.0",
     "typescript": "^5.0.0"
   }
