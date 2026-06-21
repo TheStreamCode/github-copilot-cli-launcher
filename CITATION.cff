@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "GitHub Copilot CLI Launcher"
+authors:
+  - family-names: Gasperini
+    given-names: Michael
+url: "https://github.com/TheStreamCode/github-copilot-cli-launcher"
+version: "0.2.4"
+license: MIT
