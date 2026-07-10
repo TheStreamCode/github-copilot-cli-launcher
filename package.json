@@ -3,7 +3,7 @@
   "displayName": "Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal",
   "description": "Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal, guided install. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.",
   "publisher": "mikesoft",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher.git"
