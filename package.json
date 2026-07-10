@@ -120,10 +120,10 @@
     "check": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls"
   },
   "devDependencies": {
-    "@vscode/test-electron": "^3.0.0",
     "@types/node": "^22.0.0",
     "@types/vscode": "^1.103.0",
+    "@vscode/test-electron": "^3.0.0",
     "@vscode/vsce": "^3.9.2",
-    "typescript": "^5.0.0"
+    "typescript": "^7.0.2"
   }
 }
