@@ -13,6 +13,7 @@ node_modules/**
 *.log
 Screenshot_*.jpeg
 out/**/*.map
+out/install-utils.js
 *.tsbuildinfo
 tsconfig.json
 package-lock.json

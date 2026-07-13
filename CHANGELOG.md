@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.7]
+
+### Changed
+
+- Replaced automatic and guided npm installation with a link to GitHub's official Copilot CLI installation documentation when the CLI is not found.
+- Removed the `copilotCliLauncher.autoInstall` setting and obsolete installer utilities.
+
+### Security
+
+- Removed temporary installer script generation and all child-process and shell-based installer execution.
+
 ## [0.2.6]
 
 ### Changed

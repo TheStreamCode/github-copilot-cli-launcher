@@ -19,7 +19,7 @@ A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in
 - **Toolbar launcher** — one-click button in the editor title area to start Copilot CLI
 - **Side-by-side terminal** — opens beside the active editor, never reusing existing terminals
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
-- **Guided installation** — when shell integration detects that the default `copilot` command is missing, can offer a consent-based install flow
+- **Official installation guidance** — when shell integration detects a missing CLI command, opens GitHub's official installation documentation on request
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
 - **Marketplace-ready visuals** — refreshed icon and toolbar mark are bundled with the extension package
 - **Windows-ready** — supports quoted executable paths with spaces
@@ -28,40 +28,21 @@ A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in
 ## Requirements
 
 - VS Code `^1.103.0`
-- GitHub Copilot CLI installed and available as `copilot` (`npm install -g @github/copilot`)
+- GitHub Copilot CLI installed and available as `copilot`; see GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli)
 
 ## Installation
 
 1. **Install the extension** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher).
 
-2. **Install GitHub Copilot CLI:**
-
-   ```bash
-   npm install -g @github/copilot
-   ```
+2. **Install GitHub Copilot CLI** using one of the methods in GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
 
 3. Open any file in VS Code and click the launcher button in the editor title.
 
-## Guided Installation
+## Missing CLI Guidance
 
-Missing-command guidance depends on terminal shell integration, which lets the extension observe command completion and output. Without shell integration, the launcher sends the command through its fallback path and does not show missing-command guidance.
+Missing-command guidance depends on terminal shell integration, which lets the extension observe command completion and output. When a configured CLI command is not found, the extension can open GitHub's official Copilot CLI installation documentation in your default browser. The extension does not download software, create installer files, or run installation commands.
 
-When shell integration detects that the configured command resolving to the default `copilot` executable is missing and `copilotCliLauncher.autoInstall` is enabled, the extension offers to install GitHub Copilot CLI, open the GitHub documentation, or open the extension settings. For a custom executable, it offers settings instead; with `autoInstall` disabled, it offers settings and documentation without starting an installer.
-
-Choosing **Install** opens a visible terminal and runs a generated prompt script. Installation only starts after explicit confirmation:
-
-```text
-GitHub Copilot CLI was not found.
-Install GitHub Copilot CLI now? (y/N):
-```
-
-Answer `y` or `yes` to run:
-
-```bash
-npm install -g @github/copilot
-```
-
-Any other answer cancels installation.
+Without shell integration, the launcher sends the configured command through its fallback path and cannot detect that the command is missing.
 
 ## How It Works
 
@@ -81,7 +62,6 @@ The launcher does not start Copilot CLI until the current workspace is trusted b
 | --- | --- | --- |
 | `copilotCliLauncher.cliCommand` | `copilot` | Machine-scoped command executed when the launcher button is clicked; workspace values are ignored. |
 | `copilotCliLauncher.terminalName` | `Copilot CLI` | Base label used for the created terminal. |
-| `copilotCliLauncher.autoInstall` | `true` | Offer guided installation when shell integration detects that the default `copilot` command is missing. |
 
 Open settings via the Command Palette: **Copilot CLI Launcher: Open Settings**
 
@@ -103,11 +83,7 @@ Windows executable path with spaces:
 
 ### Copilot CLI is not found
 
-Install Copilot CLI globally with npm:
-
-```bash
-npm install -g @github/copilot
-```
+Follow GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli), then verify that `copilot` is available in a regular terminal.
 
 If your setup relies on shell initialization, restart VS Code after installation so new terminals inherit the updated environment.
 

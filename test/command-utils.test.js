@@ -8,8 +8,7 @@ const {
   resolveTerminalCwd,
   extractExecutable,
   resolveCliCommandSetting,
-  shouldOfferCopilotCliInstall,
-  shouldPromptToInstallCopilot,
+  shouldShowMissingCliGuidance,
 } = require('../out/command-utils.js');
 
 // normalizeCliCommand
@@ -65,45 +64,34 @@ test('extractExecutable preserves quoted Windows paths with spaces', () => {
   );
 });
 
-// shouldOfferCopilotCliInstall
-test('shouldOfferCopilotCliInstall offers npm install for copilot executable commands', () => {
-  assert.equal(shouldOfferCopilotCliInstall('copilot'), true);
-  assert.equal(shouldOfferCopilotCliInstall('copilot --help'), true);
-});
-
-test('shouldOfferCopilotCliInstall does not offer npm install for different configured executables', () => {
-  assert.equal(shouldOfferCopilotCliInstall('custom-copilot-agent'), false);
-  assert.equal(shouldOfferCopilotCliInstall('"C:\\Program Files\\Custom Agent\\agent.exe"'), false);
-});
-
-// shouldPromptToInstallCopilot
-test('shouldPromptToInstallCopilot detects PowerShell command-not-found output', () => {
+// shouldShowMissingCliGuidance
+test('shouldShowMissingCliGuidance detects PowerShell command-not-found output', () => {
   const output = "copilot: The term 'copilot' is not recognized as a name of a cmdlet, function, script file, or executable program.";
-  assert.equal(shouldPromptToInstallCopilot('copilot', 1, output), true);
+  assert.equal(shouldShowMissingCliGuidance('copilot', 1, output), true);
 });
 
-test('shouldPromptToInstallCopilot detects POSIX command-not-found exit code', () => {
-  assert.equal(shouldPromptToInstallCopilot('copilot', 127, ''), true);
+test('shouldShowMissingCliGuidance detects POSIX command-not-found exit code', () => {
+  assert.equal(shouldShowMissingCliGuidance('copilot', 127, ''), true);
 });
 
-test('shouldPromptToInstallCopilot detects bash command-not-found output', () => {
-  assert.equal(shouldPromptToInstallCopilot('copilot', 1, 'command not found: copilot'), true);
+test('shouldShowMissingCliGuidance detects bash command-not-found output', () => {
+  assert.equal(shouldShowMissingCliGuidance('copilot', 1, 'command not found: copilot'), true);
 });
 
-test('shouldPromptToInstallCopilot detects the missing executable from a custom command', () => {
-  assert.equal(shouldPromptToInstallCopilot('custom-copilot-agent', 1, 'custom-copilot-agent: command not found'), true);
+test('shouldShowMissingCliGuidance detects the missing executable from a custom command', () => {
+  assert.equal(shouldShowMissingCliGuidance('custom-copilot-agent', 1, 'custom-copilot-agent: command not found'), true);
 });
 
-test('shouldPromptToInstallCopilot ignores copilot-looking output for a different configured executable', () => {
-  assert.equal(shouldPromptToInstallCopilot('custom-copilot-agent', 1, 'copilot: command not found'), false);
+test('shouldShowMissingCliGuidance ignores copilot-looking output for a different configured executable', () => {
+  assert.equal(shouldShowMissingCliGuidance('custom-copilot-agent', 1, 'copilot: command not found'), false);
 });
 
-test('shouldPromptToInstallCopilot ignores unrelated runtime failures', () => {
-  assert.equal(shouldPromptToInstallCopilot('copilot', 1, 'Error: authentication required'), false);
+test('shouldShowMissingCliGuidance ignores unrelated runtime failures', () => {
+  assert.equal(shouldShowMissingCliGuidance('copilot', 1, 'Error: authentication required'), false);
 });
 
-test('shouldPromptToInstallCopilot ignores non-1 exit codes that are not 127', () => {
-  assert.equal(shouldPromptToInstallCopilot('copilot', 2, 'copilot: command not found'), false);
+test('shouldShowMissingCliGuidance ignores non-1 exit codes that are not 127', () => {
+  assert.equal(shouldShowMissingCliGuidance('copilot', 2, 'copilot: command not found'), false);
 });
 
 // resolveTerminalCwd

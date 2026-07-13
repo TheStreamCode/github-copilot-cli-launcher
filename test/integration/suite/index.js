@@ -31,13 +31,10 @@ async function run() {
   const configuration = vscode.workspace.getConfiguration('copilotCliLauncher');
   const originalCliCommand = configuration.get('cliCommand');
   const originalTerminalName = configuration.get('terminalName');
-  const originalAutoInstall = configuration.get('autoInstall');
 
   try {
     await configuration.update('cliCommand', 'node --version', vscode.ConfigurationTarget.Global);
     await configuration.update('terminalName', 'Copilot CLI Test', vscode.ConfigurationTarget.Global);
-    await configuration.update('autoInstall', false, vscode.ConfigurationTarget.Global);
-
     const beforeCount = vscode.window.terminals.length;
     await vscode.commands.executeCommand('copilotCliLauncher.openCli');
     const terminal = await waitForNewTerminal(beforeCount);
@@ -49,7 +46,6 @@ async function run() {
   } finally {
     await configuration.update('cliCommand', originalCliCommand, vscode.ConfigurationTarget.Global);
     await configuration.update('terminalName', originalTerminalName, vscode.ConfigurationTarget.Global);
-    await configuration.update('autoInstall', originalAutoInstall, vscode.ConfigurationTarget.Global);
   }
 }
 

@@ -14,5 +14,5 @@ Keep changes focused and covered by tests. Do not add official GitHub, Microsoft
 ## Pull Requests
 
 - Keep user-facing behavior documented in `README.md`.
-- Add or update tests for launcher behavior, package metadata, and install helpers.
+- Add or update tests for launcher behavior and package metadata.
 - Run `npm run check` before submitting changes.

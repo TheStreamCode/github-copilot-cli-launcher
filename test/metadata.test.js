@@ -41,8 +41,8 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
   const packageJson = readPackageJson();
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal');
-  assert.equal(packageJson.description, 'Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal, guided install. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.');
-  assert.equal(packageJson.version, '0.2.5');
+  assert.equal(packageJson.description, 'Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.');
+  assert.equal(packageJson.version, '0.2.7');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -72,10 +72,7 @@ test('package settings include cliCommand and terminalName', () => {
   assert.equal(properties['copilotCliLauncher.terminalName'].default, 'Copilot CLI');
   assert.equal(properties['copilotCliLauncher.terminalName'].scope, 'window');
 
-  assert.ok(properties['copilotCliLauncher.autoInstall']);
-  assert.equal(properties['copilotCliLauncher.autoInstall'].default, true);
-  assert.equal(properties['copilotCliLauncher.autoInstall'].scope, 'machine');
-  assert.match(properties['copilotCliLauncher.autoInstall'].description, /explicit confirmation/i);
+  assert.equal(properties['copilotCliLauncher.autoInstall'], undefined);
   assert.deepEqual(packageJson.capabilities.untrustedWorkspaces.restrictedConfigurations, [
     'copilotCliLauncher.cliCommand',
   ]);
@@ -107,12 +104,12 @@ test('README is organized around user-facing setup, configuration, and troublesh
   assert.match(readme, /^# Copilot CLI Launcher$/m);
   assert.match(readme, /opens the standalone GitHub Copilot CLI coding agent in a new side terminal/i);
   assert.match(readme, /## Features/);
-  assert.match(readme, /## Guided Installation/);
+  assert.match(readme, /## Missing CLI Guidance/);
   assert.match(readme, /## Configuration/);
   assert.match(readme, /## Troubleshooting/);
   assert.match(readme, /Copilot CLI Launcher: Open Settings/);
-  assert.match(readme, /npm install -g @github\/copilot/);
-  assert.match(readme, /explicit confirmation/i);
+  assert.match(readme, /official installation documentation/i);
+  assert.match(readme, /does not download software, create installer files, or run installation commands/i);
   assert.match(readme, /npm run package/);
   assert.match(readme, /uses the active editor/i);
   assert.match(readme, /does not collect telemetry, analytics, or personal data/i);
@@ -143,7 +140,7 @@ test('README documents key features and privacy notes', () => {
   const readme = readText('README.md');
 
   assert.match(readme, /does not collect telemetry, analytics, or personal data\./i);
-  assert.match(readme, /npm install -g @github\/copilot/);
+  assert.match(readme, /official installation documentation/i);
   assert.match(readme, /npm run package/);
 });
 
@@ -180,6 +177,7 @@ test('ignore rules keep tests docs source maps and local tooling out of artifact
   assert.ok(vscodeignoreEntries.includes('docs/**'));
   assert.ok(vscodeignoreEntries.includes('.gitignore'));
   assert.ok(vscodeignoreEntries.includes('out/**/*.map'));
+  assert.ok(vscodeignoreEntries.includes('out/install-utils.js'));
   assert.ok(vscodeignoreEntries.includes('*.tsbuildinfo'));
   assert.ok(vscodeignoreEntries.includes('.vsce/**'));
   assert.ok(vscodeignoreEntries.includes('package-lock.json'));
@@ -194,4 +192,20 @@ test('CI workflow validates the extension with npm on Windows and Linux', () => 
   assert.match(workflow, /cache: npm/);
   assert.match(workflow, /npm ci/);
   assert.match(workflow, /npm run check/);
+});
+
+test('missing CLI guidance only opens the official installation documentation', () => {
+  const packageJson = readPackageJson();
+  const extensionSource = readText('src/extension.ts');
+  const properties = packageJson.contributes.configuration.properties;
+
+  assert.equal(properties['copilotCliLauncher.autoInstall'], undefined);
+  assert.equal(fs.existsSync(path.join(rootDir, 'src', 'install-utils.ts')), false);
+  assert.match(
+    extensionSource,
+    /https:\/\/docs\.github\.com\/en\/copilot\/how-tos\/copilot-cli\/set-up-copilot-cli\/install-copilot-cli/,
+  );
+  assert.match(extensionSource, /vscode\.env\.openExternal/);
+  assert.doesNotMatch(extensionSource, /node:(?:child_process|fs|os|path)/);
+  assert.doesNotMatch(extensionSource, /install-utils|tmpdir|writeFileSync|npm install|\b(?:exec|spawn)\b|shell:\s*true/);
 });

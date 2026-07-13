@@ -98,13 +98,8 @@ export function extractExecutable(command: string): string {
   return whitespaceIndex === -1 ? normalized : normalized.slice(0, whitespaceIndex);
 }
 
-/** Returns whether the configured command is the npm-installed Copilot CLI executable. */
-export function shouldOfferCopilotCliInstall(command: string): boolean {
-  return getExecutableBaseName(command).toLowerCase() === FALLBACK_CLI_COMMAND;
-}
-
 /** Returns whether a terminal failure likely means the copilot CLI is missing. */
-export function shouldPromptToInstallCopilot(command: string, exitCode: number | undefined, output: string): boolean {
+export function shouldShowMissingCliGuidance(command: string, exitCode: number | undefined, output: string): boolean {
   if (exitCode === 127) {
     return true;
   }
