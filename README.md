@@ -9,10 +9,8 @@
 
 A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
 
-Works on Windows, macOS, and Linux.
-
 > **Disclaimer**
-> This extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft. "GitHub Copilot" is a trademark of GitHub, Inc.
+> This independent extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft. See [TRADEMARKS.md](TRADEMARKS.md) for trademark information.
 
 > **✨ Want one launcher for every agent?** Try **[Super CLI](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-super-cli)** — a single sidebar that launches Claude Code, Codex, Copilot, Cursor, Grok, Kilo, Antigravity, OpenCode, and more. Install this launcher for Copilot alone, or Super CLI for the whole set.
 
@@ -21,7 +19,7 @@ Works on Windows, macOS, and Linux.
 - **Toolbar launcher** — one-click button in the editor title area to start Copilot CLI
 - **Side-by-side terminal** — opens beside the active editor, never reusing existing terminals
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
-- **Guided installation** — offers a consent-based install flow when the default `copilot` command is missing
+- **Guided installation** — when shell integration detects that the default `copilot` command is missing, can offer a consent-based install flow
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
 - **Marketplace-ready visuals** — refreshed icon and toolbar mark are bundled with the extension package
 - **Windows-ready** — supports quoted executable paths with spaces
@@ -42,13 +40,13 @@ Works on Windows, macOS, and Linux.
    npm install -g @github/copilot
    ```
 
-   GitHub also supports WinGet on Windows and Homebrew on macOS/Linux; keep `copilotCliLauncher.cliCommand` set to the command or executable path that launches the standalone `copilot` CLI.
-
 3. Open any file in VS Code and click the launcher button in the editor title.
 
 ## Guided Installation
 
-If the default `copilot` command is missing, the extension shows a guided warning with options to install GitHub Copilot CLI, open the GitHub documentation, or open the extension settings.
+Missing-command guidance depends on terminal shell integration, which lets the extension observe command completion and output. Without shell integration, the launcher sends the command through its fallback path and does not show missing-command guidance.
+
+When shell integration detects that the configured command resolving to the default `copilot` executable is missing and `copilotCliLauncher.autoInstall` is enabled, the extension offers to install GitHub Copilot CLI, open the GitHub documentation, or open the extension settings. For a custom executable, it offers settings instead; with `autoInstall` disabled, it offers settings and documentation without starting an installer.
 
 Choosing **Install** opens a visible terminal and runs a generated prompt script. Installation only starts after explicit confirmation:
 
@@ -63,23 +61,27 @@ Answer `y` or `yes` to run:
 npm install -g @github/copilot
 ```
 
-Any other answer cancels installation. GitHub also documents WinGet, Homebrew, and install-script alternatives if npm is not your preferred setup path.
+Any other answer cancels installation.
 
 ## How It Works
 
 Each launch creates a new terminal beside the current editor and sends the configured command immediately. Existing terminals are never reused.
 
-The launcher prefers the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder.
+The launcher uses the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder. With no workspace folder, the launcher does not set a working directory.
 
-If the default `copilot` command is not installed, the extension shows the guided installation flow. If a custom executable is configured and cannot be started, the extension opens its settings instead.
+## Workspace Trust and Command Safety
+
+The launcher does not start Copilot CLI until the current workspace is trusted because it runs a terminal command in that workspace. Review workspace trust before launching Copilot CLI in a repository you do not trust.
+
+`copilotCliLauncher.cliCommand` is a machine-scoped setting. The launcher uses only its default or user/machine value and ignores workspace-controlled values, so a workspace cannot set the command it launches.
 
 ## Configuration
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `copilotCliLauncher.cliCommand` | `copilot` | Command executed when the launcher button is clicked. |
+| `copilotCliLauncher.cliCommand` | `copilot` | Machine-scoped command executed when the launcher button is clicked; workspace values are ignored. |
 | `copilotCliLauncher.terminalName` | `Copilot CLI` | Base label used for the created terminal. |
-| `copilotCliLauncher.autoInstall` | `true` | Offer guided installation when the default `copilot` command is missing. |
+| `copilotCliLauncher.autoInstall` | `true` | Offer guided installation when shell integration detects that the default `copilot` command is missing. |
 
 Open settings via the Command Palette: **Copilot CLI Launcher: Open Settings**
 

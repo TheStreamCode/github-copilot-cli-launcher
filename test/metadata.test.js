@@ -106,8 +106,6 @@ test('README is organized around user-facing setup, configuration, and troublesh
 
   assert.match(readme, /^# Copilot CLI Launcher$/m);
   assert.match(readme, /opens the standalone GitHub Copilot CLI coding agent in a new side terminal/i);
-  assert.match(readme, /Works on Windows, macOS, and Linux\./);
-  assert.match(readme, /This extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft\./);
   assert.match(readme, /## Features/);
   assert.match(readme, /## Guided Installation/);
   assert.match(readme, /## Configuration/);
