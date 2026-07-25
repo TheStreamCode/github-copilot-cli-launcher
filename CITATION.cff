@@ -5,5 +5,5 @@ authors:
   - family-names: Gasperini
     given-names: Michael
 url: "https://github.com/TheStreamCode/github-copilot-cli-launcher"
-version: "0.2.7"
+version: "0.2.8"
 license: MIT
