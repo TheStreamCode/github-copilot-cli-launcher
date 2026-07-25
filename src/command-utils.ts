@@ -98,6 +98,45 @@ export function extractExecutable(command: string): string {
   return whitespaceIndex === -1 ? normalized : normalized.slice(0, whitespaceIndex);
 }
 
+/**
+ * Returns whether an explicit executable path (as configured by the user, not resolved against
+ * PATH) is GitHub's own `copilot`/`copilot.bat`/`copilot.ps1` bootstrapper, installed under the
+ * `github.copilot-chat` extension's global storage. That bootstrapper can hang instead of
+ * exiting when launched as a terminal child process, leaving an orphaned `powershell.exe`
+ * process behind. See README "Known Issue: GitHub Copilot Chat Bootstrapper Hang" for details.
+ *
+ * This checks only the literal configured path — it never touches the filesystem or resolves
+ * PATH, so it cannot detect the same hang when the command is the bare, unqualified `copilot`
+ * name and a shell resolves it to the bootstrapper. `isDefaultBareCopilotCommand` covers that
+ * case with a one-time advisory instead, since confirming the actual PATH resolution would
+ * require filesystem access this extension intentionally does not perform.
+ */
+export function isGitHubCopilotChatBootstrapper(explicitPath: string): boolean {
+  const executable = extractExecutable(explicitPath);
+  if (!/[\\/]/.test(executable)) {
+    return false;
+  }
+
+  const normalized = executable.replace(/\\/g, '/').toLowerCase();
+
+  return (
+    /\/copilotcli\/copilot(\.bat|\.cmd|\.ps1)?$/.test(normalized)
+    && normalized.includes('/github.copilot-chat/')
+  );
+}
+
+/**
+ * Returns whether `command` is the unmodified default (`copilot`, with no explicit path,
+ * arguments, or quoting). On Windows this bare name can resolve, via PATH, to GitHub's Copilot
+ * Chat bootstrapper instead of the real Copilot CLI binary if that bootstrapper's directory
+ * appears earlier on PATH — a known, reported hang. This check is a text-only heuristic: it
+ * flags the condition that makes the hang *possible*, not a confirmed resolution, since
+ * confirming it would require filesystem access this extension intentionally does not perform.
+ */
+export function isDefaultBareCopilotCommand(command: string): boolean {
+  return command.trim() === FALLBACK_CLI_COMMAND;
+}
+
 /** Returns whether a terminal failure likely means the copilot CLI is missing. */
 export function shouldShowMissingCliGuidance(command: string, exitCode: number | undefined, output: string): boolean {
   if (exitCode === 127) {

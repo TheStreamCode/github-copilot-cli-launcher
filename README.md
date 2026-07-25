@@ -79,6 +79,27 @@ Windows executable path with spaces:
 "copilotCliLauncher.cliCommand": "\"C:\\Program Files\\GitHub Copilot\\copilot.exe\""
 ```
 
+## Known Issue: GitHub Copilot Chat Bootstrapper Hang
+
+On Windows, if the GitHub Copilot Chat extension for VS Code is or was ever installed, it can leave a `copilot`/`copilot.bat`/`copilot.ps1` bootstrapper script under its extension global storage (`...\Code\User\globalStorage\github.copilot-chat\copilotCli\`). If that directory appears earlier on your system `PATH` than the real Copilot CLI installation, the plain `copilot` command — this launcher's default — can resolve to that bootstrapper instead of the real binary.
+
+We have observed that bootstrapper hang instead of exiting when launched from a terminal, leaving an orphaned `powershell.exe` process running indefinitely and consuming CPU. Because each launch can leave behind a new stuck process, repeated use compounds the effect on system responsiveness.
+
+This launcher cannot see which binary your shell will actually resolve `copilot` to — it only starts a terminal and sends the configured command, the same as typing it yourself. It therefore cannot silently work around the hang. Instead:
+
+- If `copilotCliLauncher.cliCommand` is explicitly set to a path inside `github.copilot-chat\copilotCli\`, the launcher blocks the launch and asks for confirmation.
+- If you are using the plain default `copilot` command on Windows, the launcher shows a one-time advisory pointing here.
+
+**Mitigation:** set `copilotCliLauncher.cliCommand` to the full, quoted path of your real Copilot CLI executable (for example the WinGet or npm install location) so it never depends on `PATH` order:
+
+```json
+"copilotCliLauncher.cliCommand": "\"C:\\Users\\<you>\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GitHub.Copilot_Microsoft.Winget.Source_8wekyb3d8bbwe\\copilot.exe\""
+```
+
+Find your real binary's path with `Get-Command copilot -All` in PowerShell, or `where copilot` — it lists every match on `PATH` in resolution order.
+
+This is not a bug in this launcher, the Copilot CLI binary, or your BYOK/model-switching setup; it is a hang in GitHub's own bootstrapper script when launched as a non-interactive terminal child process. If you can reproduce it outside this launcher, please report it to GitHub through the official [Copilot CLI documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
+
 ## Troubleshooting
 
 ### Copilot CLI is not found

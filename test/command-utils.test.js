@@ -9,6 +9,8 @@ const {
   extractExecutable,
   resolveCliCommandSetting,
   shouldShowMissingCliGuidance,
+  isGitHubCopilotChatBootstrapper,
+  isDefaultBareCopilotCommand,
 } = require('../out/command-utils.js');
 
 // normalizeCliCommand
@@ -92,6 +94,77 @@ test('shouldShowMissingCliGuidance ignores unrelated runtime failures', () => {
 
 test('shouldShowMissingCliGuidance ignores non-1 exit codes that are not 127', () => {
   assert.equal(shouldShowMissingCliGuidance('copilot', 2, 'copilot: command not found'), false);
+});
+
+// isGitHubCopilotChatBootstrapper
+test('isGitHubCopilotChatBootstrapper detects the Windows batch bootstrapper', () => {
+  assert.equal(
+    isGitHubCopilotChatBootstrapper(
+      'C:\\Users\\Mike\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli\\copilot.bat',
+    ),
+    true,
+  );
+});
+
+test('isGitHubCopilotChatBootstrapper detects the PowerShell bootstrapper', () => {
+  assert.equal(
+    isGitHubCopilotChatBootstrapper(
+      'C:/Users/Mike/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/copilotCli/copilot.ps1',
+    ),
+    true,
+  );
+});
+
+test('isGitHubCopilotChatBootstrapper detects the extension-less POSIX shim', () => {
+  assert.equal(
+    isGitHubCopilotChatBootstrapper(
+      '/home/mike/.config/Code/User/globalStorage/github.copilot-chat/copilotCli/copilot',
+    ),
+    true,
+  );
+});
+
+test('isGitHubCopilotChatBootstrapper ignores the real Copilot CLI binary', () => {
+  assert.equal(
+    isGitHubCopilotChatBootstrapper(
+      'C:\\Users\\Mike\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GitHub.Copilot_Microsoft.Winget.Source_8wekyb3d8bbwe\\copilot.exe',
+    ),
+    false,
+  );
+});
+
+test('isGitHubCopilotChatBootstrapper ignores unrelated copilot-named files outside the extension storage', () => {
+  assert.equal(isGitHubCopilotChatBootstrapper('C:\\tools\\copilotCli\\copilot.bat'), false);
+});
+
+test('isGitHubCopilotChatBootstrapper unwraps quoted paths before matching', () => {
+  assert.equal(
+    isGitHubCopilotChatBootstrapper(
+      '"C:\\Users\\Mike\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli\\copilot.ps1"',
+    ),
+    true,
+  );
+});
+
+test('isGitHubCopilotChatBootstrapper ignores the bare command name, which is not an explicit path', () => {
+  assert.equal(isGitHubCopilotChatBootstrapper('copilot'), false);
+});
+
+// isDefaultBareCopilotCommand
+test('isDefaultBareCopilotCommand is true for the unmodified default command', () => {
+  assert.equal(isDefaultBareCopilotCommand('copilot'), true);
+});
+
+test('isDefaultBareCopilotCommand tolerates surrounding whitespace', () => {
+  assert.equal(isDefaultBareCopilotCommand('  copilot  '), true);
+});
+
+test('isDefaultBareCopilotCommand is false when arguments are appended', () => {
+  assert.equal(isDefaultBareCopilotCommand('copilot --help'), false);
+});
+
+test('isDefaultBareCopilotCommand is false for an explicit executable path', () => {
+  assert.equal(isDefaultBareCopilotCommand('"C:\\Program Files\\GitHub Copilot\\copilot.exe"'), false);
 });
 
 // resolveTerminalCwd

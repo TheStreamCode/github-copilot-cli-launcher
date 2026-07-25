@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.8]
+
+### Added
+
+- Detection for GitHub Copilot Chat's `copilot`/`copilot.bat`/`copilot.ps1` bootstrapper script, which can hang instead of exiting when launched as a terminal child process and leave an orphaned, CPU-consuming `powershell.exe` process on Windows.
+- A blocking confirmation when `copilotCliLauncher.cliCommand` explicitly points at the bootstrapper, with an option to launch anyway, open settings, or read more.
+- A one-time advisory (per VS Code session) when using the plain default `copilot` command on Windows, since PATH resolution order can silently route it to the bootstrapper instead of the real CLI.
+- A new "Known Issue: GitHub Copilot Chat Bootstrapper Hang" section in the README with mitigation steps.
+
+### Changed
+
+- None of the new detection reads the filesystem or resolves PATH; it is a text-only check against the configured command, consistent with the extension's existing no-child-process, no-filesystem-access design.
+
 ## [0.2.7]
 
 ### Changed

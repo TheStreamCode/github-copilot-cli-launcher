@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal');
   assert.equal(packageJson.description, 'Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.');
-  assert.equal(packageJson.version, '0.2.7');
+  assert.equal(packageJson.version, '0.2.8');
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
