@@ -11,6 +11,9 @@ const {
   shouldShowMissingCliGuidance,
   isGitHubCopilotChatBootstrapper,
   isDefaultBareCopilotCommand,
+  classifyBootstrapperRisk,
+  shouldConfirmBootstrapperLaunch,
+  resolveBootstrapperPromptSelection,
 } = require('../out/command-utils.js');
 
 // normalizeCliCommand
@@ -165,6 +168,87 @@ test('isDefaultBareCopilotCommand is false when arguments are appended', () => {
 
 test('isDefaultBareCopilotCommand is false for an explicit executable path', () => {
   assert.equal(isDefaultBareCopilotCommand('"C:\\Program Files\\GitHub Copilot\\copilot.exe"'), false);
+});
+
+// classifyBootstrapperRisk
+test('classifyBootstrapperRisk returns "explicit" for a path that literally points at the bootstrapper', () => {
+  const bootstrapperPath = 'C:\\Users\\Mike\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli\\copilot.ps1';
+  assert.equal(classifyBootstrapperRisk(bootstrapperPath, 'win32'), 'explicit');
+});
+
+test('classifyBootstrapperRisk returns "explicit" even on non-Windows platforms', () => {
+  const bootstrapperPath = '/home/mike/.config/Code/User/globalStorage/github.copilot-chat/copilotCli/copilot';
+  assert.equal(classifyBootstrapperRisk(bootstrapperPath, 'linux'), 'explicit');
+});
+
+test('classifyBootstrapperRisk returns "possible-default" for the bare command on Windows', () => {
+  assert.equal(classifyBootstrapperRisk('copilot', 'win32'), 'possible-default');
+});
+
+test('classifyBootstrapperRisk returns "none" for the bare command on non-Windows platforms', () => {
+  assert.equal(classifyBootstrapperRisk('copilot', 'linux'), 'none');
+  assert.equal(classifyBootstrapperRisk('copilot', 'darwin'), 'none');
+});
+
+test('classifyBootstrapperRisk returns "none" for an explicit path to the real binary', () => {
+  const realPath = '"C:\\Program Files\\GitHub Copilot\\copilot.exe"';
+  assert.equal(classifyBootstrapperRisk(realPath, 'win32'), 'none');
+});
+
+test('classifyBootstrapperRisk returns "none" when the command has extra arguments', () => {
+  assert.equal(classifyBootstrapperRisk('copilot --help', 'win32'), 'none');
+});
+
+// shouldConfirmBootstrapperLaunch
+test('shouldConfirmBootstrapperLaunch is false for "none" risk regardless of acknowledgement', () => {
+  assert.equal(shouldConfirmBootstrapperLaunch('none', false), false);
+  assert.equal(shouldConfirmBootstrapperLaunch('none', true), false);
+});
+
+test('shouldConfirmBootstrapperLaunch always prompts for "explicit" risk, even if acknowledged', () => {
+  assert.equal(shouldConfirmBootstrapperLaunch('explicit', false), true);
+  assert.equal(shouldConfirmBootstrapperLaunch('explicit', true), true);
+});
+
+test('shouldConfirmBootstrapperLaunch prompts for "possible-default" risk until acknowledged', () => {
+  assert.equal(shouldConfirmBootstrapperLaunch('possible-default', false), true);
+  assert.equal(shouldConfirmBootstrapperLaunch('possible-default', true), false);
+});
+
+// resolveBootstrapperPromptSelection
+test('resolveBootstrapperPromptSelection proceeds and acknowledges on "Launch Anyway" for possible-default risk', () => {
+  assert.deepEqual(
+    resolveBootstrapperPromptSelection('possible-default', 'Launch Anyway'),
+    { proceed: true, acknowledgePossibleDefault: true, action: 'none' },
+  );
+});
+
+test('resolveBootstrapperPromptSelection proceeds without acknowledging on "Launch Anyway" for explicit risk', () => {
+  assert.deepEqual(
+    resolveBootstrapperPromptSelection('explicit', 'Launch Anyway'),
+    { proceed: true, acknowledgePossibleDefault: false, action: 'none' },
+  );
+});
+
+test('resolveBootstrapperPromptSelection blocks and opens settings on "Open Settings"', () => {
+  assert.deepEqual(
+    resolveBootstrapperPromptSelection('possible-default', 'Open Settings'),
+    { proceed: false, acknowledgePossibleDefault: false, action: 'openSettings' },
+  );
+});
+
+test('resolveBootstrapperPromptSelection blocks and opens docs on "Learn More"', () => {
+  assert.deepEqual(
+    resolveBootstrapperPromptSelection('explicit', 'Learn More'),
+    { proceed: false, acknowledgePossibleDefault: false, action: 'learnMore' },
+  );
+});
+
+test('resolveBootstrapperPromptSelection blocks without acknowledging on a bare dismissal (Escape/click-away)', () => {
+  assert.deepEqual(
+    resolveBootstrapperPromptSelection('possible-default', undefined),
+    { proceed: false, acknowledgePossibleDefault: false, action: 'none' },
+  );
 });
 
 // resolveTerminalCwd

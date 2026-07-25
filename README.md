@@ -85,10 +85,10 @@ On Windows, if the GitHub Copilot Chat extension for VS Code is or was ever inst
 
 We have observed that bootstrapper hang instead of exiting when launched from a terminal, leaving an orphaned `powershell.exe` process running indefinitely and consuming CPU. Because each launch can leave behind a new stuck process, repeated use compounds the effect on system responsiveness.
 
-This launcher cannot see which binary your shell will actually resolve `copilot` to — it only starts a terminal and sends the configured command, the same as typing it yourself. It therefore cannot silently work around the hang. Instead:
+This launcher cannot see which binary your shell will actually resolve `copilot` to — it only starts a terminal and sends the configured command, the same as typing it yourself. It therefore cannot silently work around the hang. Instead, it blocks the launch and asks for confirmation:
 
-- If `copilotCliLauncher.cliCommand` is explicitly set to a path inside `github.copilot-chat\copilotCli\`, the launcher blocks the launch and asks for confirmation.
-- If you are using the plain default `copilot` command on Windows, the launcher shows a one-time advisory pointing here.
+- If `copilotCliLauncher.cliCommand` is explicitly set to a path inside `github.copilot-chat\copilotCli\`, every launch is blocked until you confirm.
+- If you are using the plain default `copilot` command on Windows, the first launch each VS Code session is blocked with a warning; choosing **Launch Anyway** proceeds for the rest of that session. Dismissing the warning any other way (Escape, clicking outside, "Open Settings", "Learn More") blocks that launch and asks again next time, since it does not mean you have accepted the risk.
 
 **Mitigation:** set `copilotCliLauncher.cliCommand` to the full, quoted path of your real Copilot CLI executable (for example the WinGet or npm install location) so it never depends on `PATH` order:
 
