@@ -42,7 +42,7 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal');
   assert.equal(packageJson.description, 'Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.');
-  assert.equal(packageJson.version, '0.2.9');
+  assert.equal(packageJson.version, '0.2.10');
   assert.equal(packageJson.private, true);
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
@@ -200,6 +200,19 @@ test('CI workflow validates the extension with npm on Windows and Linux', () => 
   assert.match(workflow, /npm run audit/);
   assert.match(workflow, /npm run check/);
   assert.match(workflow, /persist-credentials: false/);
+});
+
+test('per-launch listeners stay out of the never-drained extension subscriptions array', () => {
+  const extensionSource = readText('src/extension.ts');
+  const subscriptionPushes = extensionSource.match(/context\.subscriptions\.push\(/g) ?? [];
+
+  // VS Code drains `context.subscriptions` only at deactivate, so anything registered per launch
+  // must go through the disposable registry instead. Exactly one push, inside `activate`, is
+  // expected: the two commands plus the aggregate registry teardown.
+  assert.equal(subscriptionPushes.length, 1);
+  assert.match(extensionSource, /createDisposableRegistry\(\)/);
+  assert.match(extensionSource, /launchDisposables\.track\(/);
+  assert.match(extensionSource, /launchDisposables\.disposeAll\(\)/);
 });
 
 test('missing CLI guidance only opens the official installation documentation', () => {

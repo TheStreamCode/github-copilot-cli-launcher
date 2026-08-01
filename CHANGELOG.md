@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.10] - 2026-08-01
+
+### Fixed
+
+- Stopped registering every launch's shell-integration listener, fallback timer, and shell-execution listener on the extension context, which VS Code releases only at deactivate. Repeated toolbar clicks appended entries that were never removed and kept each launch's captured terminal output reachable for the rest of the session; launch-scoped disposables now deregister themselves as soon as they are disposed.
+- Closing the launcher terminal before its command is sent now cancels that launch's pending shell-integration wait, fallback timer, and missing-command listener instead of leaving them to fire against a terminal that no longer exists.
+
+### Changed
+
+- Extracted the launch disposable registry into `command-utils.ts` as a pure, unit-tested helper and named the shell-integration fallback delay constant.
+- Documented the packaging, publishing, validation, and asset rules for the repository in `AGENTS.md`.
+
+### Added
+
+- Unit tests covering the disposable registry and a metadata regression test asserting that per-launch listeners stay out of the never-drained extension subscriptions array.
+
 ## [0.2.9] - 2026-08-01
 
 ### Changed
@@ -186,5 +202,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Smart working directory resolution from the active editor.
 - Windows, macOS, and Linux support.
 
-[Unreleased]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.10...HEAD
+[0.2.10]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.8...v0.2.9

@@ -6,10 +6,10 @@ Use this checklist for stable releases. Publishing is an external write and requ
 
 Choose the next semantic version and keep it synchronized in:
 
-- `package.json`
-- `package-lock.json`
+- `package.json` and `package-lock.json` (use `npm version <version> --no-git-tag-version`)
 - `CITATION.cff`
-- version-sensitive metadata tests
+- the version assertion in `test/metadata.test.js`
+- the default `tag` input of `.github/workflows/publish-open-vsx.yml`
 - `CHANGELOG.md`
 
 Move completed changelog entries from `Unreleased` into a dated release section and update the comparison links.
