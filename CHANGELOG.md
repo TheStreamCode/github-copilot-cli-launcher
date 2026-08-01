@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-08-01
+
+### Changed
+
+- Bounded captured terminal output to the most recent 64 KiB so long-running Copilot CLI sessions cannot grow the extension host's diagnostic buffer indefinitely.
+- Made the Windows bare-command bootstrapper warning case-insensitive to match Windows command resolution.
+- Compilations now clean `out/` first, preventing stale JavaScript from entering a VSIX package.
+- Reused the optimized Marketplace PNG for the toolbar command and removed a 5.24 MB raster-heavy SVG duplicate, reducing the packaged VSIX by roughly 96% without changing the artwork.
+- Hardened CI with immutable action revisions, least-privilege checkout credentials, concurrency cancellation, timeouts, and dependency auditing.
+- Corrected contributor, support, security, and engineering documentation.
+
+### Security
+
+- Updated the lockfile to resolve the high-severity `brace-expansion` development-tooling advisory.
+- Removed the obsolete writable Dependabot auto-merge workflow after version updates were disabled; security updates remain subject to normal review and branch protection.
+
 ## [0.2.8]
 
 ### Added
@@ -169,3 +185,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Configurable CLI command and terminal name.
 - Smart working directory resolution from the active editor.
 - Windows, macOS, and Linux support.
+
+[Unreleased]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.8...v0.2.9

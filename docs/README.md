@@ -2,12 +2,13 @@
 
 This directory contains engineering documents for the repository. End-user installation, usage, and troubleshooting guidance lives in the root `README.md`.
 
-## Structure
+## Engineering Notes
 
-- `specs/`: scoped design documents for engineering changes
-- `plans/`: implementation plans and historical execution notes
+Add durable engineering notes here when a change needs more context than the code, tests, changelog, or pull request can provide. Use descriptive Markdown filenames and include the decision, alternatives considered, and validation evidence.
 
-Current release focuses on one-click GitHub Copilot CLI launch from the editor toolbar and safe missing-command guidance through GitHub's official installation documentation.
+- [`RELEASING.md`](RELEASING.md): versioning, validation, GitHub release, and registry publication checklist
+
+The current release focuses on one-click GitHub Copilot CLI launch from the editor toolbar and safe missing-command guidance through GitHub's official installation documentation.
 
 ## Document Status
 

@@ -42,7 +42,8 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
 
   assert.equal(packageJson.displayName, 'Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal');
   assert.equal(packageJson.description, 'Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.');
-  assert.equal(packageJson.version, '0.2.8');
+  assert.equal(packageJson.version, '0.2.9');
+  assert.equal(packageJson.private, true);
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
@@ -52,8 +53,8 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
   assert.equal(openCliCommand.title, 'Open Copilot CLI in Side Terminal');
   assert.equal(openCliCommand.category, 'Copilot CLI Launcher');
   assert.deepEqual(openCliCommand.icon, {
-    light: './media/launcher-mark.svg',
-    dark: './media/launcher-mark.svg',
+    light: './media/icon.png',
+    dark: './media/icon.png',
   });
   assert.equal(openSettingsCommand.command, 'copilotCliLauncher.openSettings');
   assert.equal(openSettingsCommand.category, 'Copilot CLI Launcher');
@@ -79,22 +80,26 @@ test('package settings include cliCommand and terminalName', () => {
 });
 
 test('extension assets keep Marketplace and command icons packaged on the expected paths', () => {
+  const packageJson = readPackageJson();
   const marketplaceIcon = readPngSize('media/icon.png');
-  const commandIcon = readText('media/launcher-mark.svg');
+  const iconBytes = fs.statSync(path.join(rootDir, 'media', 'icon.png')).size;
 
   assert.ok(marketplaceIcon.width >= 256);
   assert.ok(marketplaceIcon.height >= 256);
-  assert.match(commandIcon, /<svg/i);
-  assert.ok(commandIcon.length > 0);
+  assert.ok(iconBytes < 256 * 1024);
+  assert.equal(packageJson.contributes.commands[0].icon.light, './media/icon.png');
+  assert.equal(packageJson.contributes.commands[0].icon.dark, './media/icon.png');
 });
 
 test('package scripts use deterministic local tooling entry points', () => {
   const packageJson = readPackageJson();
 
-  assert.equal(packageJson.scripts.compile, 'node ./node_modules/typescript/bin/tsc -p . --pretty false');
-  assert.equal(packageJson.scripts.test, 'node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js');
-  assert.equal(packageJson.scripts['test:integration'], 'node ./node_modules/typescript/bin/tsc -p . --pretty false && node ./test/integration/runTest.js');
-  assert.equal(packageJson.scripts.check, 'node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls');
+  assert.match(packageJson.scripts.clean, /rmSync\('out'/);
+  assert.equal(packageJson.scripts.compile, 'npm run clean && node ./node_modules/typescript/bin/tsc -p . --pretty false');
+  assert.equal(packageJson.scripts.test, 'npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js');
+  assert.equal(packageJson.scripts['test:integration'], 'npm run compile && node ./test/integration/runTest.js');
+  assert.equal(packageJson.scripts.audit, 'npm audit --audit-level=high');
+  assert.equal(packageJson.scripts.check, 'npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls');
   assert.equal(packageJson.scripts.package, 'node ./node_modules/@vscode/vsce/vsce package');
 });
 
@@ -127,13 +132,13 @@ test('SUPPORT explains when to use issues and when to contact the maintainer dir
   assert.match(support, /https:\/\/mikesoft\.it/);
 });
 
-test('docs directory includes an index for engineering documents', () => {
+test('docs directory includes an accurate engineering documentation index', () => {
   const docsReadme = readText('docs/README.md');
 
   assert.match(docsReadme, /^# Documentation$/m);
   assert.match(docsReadme, /root `README\.md`/);
-  assert.match(docsReadme, /`specs\/`/);
-  assert.match(docsReadme, /`plans\/`/);
+  assert.match(docsReadme, /Add durable engineering notes here/i);
+  assert.doesNotMatch(docsReadme, /`(?:specs|plans)\/`/);
 });
 
 test('README documents key features and privacy notes', () => {
@@ -176,8 +181,9 @@ test('ignore rules keep tests docs source maps and local tooling out of artifact
   assert.ok(vscodeignoreEntries.includes('test/**'));
   assert.ok(vscodeignoreEntries.includes('docs/**'));
   assert.ok(vscodeignoreEntries.includes('.gitignore'));
+  assert.ok(vscodeignoreEntries.includes('AGENTS.md'));
   assert.ok(vscodeignoreEntries.includes('out/**/*.map'));
-  assert.ok(vscodeignoreEntries.includes('out/install-utils.js'));
+  assert.ok(vscodeignoreEntries.includes('out/install-utils.js') === false);
   assert.ok(vscodeignoreEntries.includes('*.tsbuildinfo'));
   assert.ok(vscodeignoreEntries.includes('.vsce/**'));
   assert.ok(vscodeignoreEntries.includes('package-lock.json'));
@@ -191,7 +197,9 @@ test('CI workflow validates the extension with npm on Windows and Linux', () => 
   assert.match(workflow, /ubuntu-latest/);
   assert.match(workflow, /cache: npm/);
   assert.match(workflow, /npm ci/);
+  assert.match(workflow, /npm run audit/);
   assert.match(workflow, /npm run check/);
+  assert.match(workflow, /persist-credentials: false/);
 });
 
 test('missing CLI guidance only opens the official installation documentation', () => {

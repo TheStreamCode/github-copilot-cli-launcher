@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {
   FALLBACK_TERMINAL_NAME,
+  appendBoundedOutput,
   buildExtensionSettingsQuery,
   buildTerminalName,
   classifyBootstrapperRisk,
@@ -33,7 +34,7 @@ function collectShellExecutionOutput(execution: vscode.TerminalShellExecution): 
 
     try {
       for await (const chunk of execution.read()) {
-        output += chunk;
+        output = appendBoundedOutput(output, chunk);
       }
     } catch {
       return output;

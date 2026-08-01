@@ -1,5 +1,6 @@
 const FALLBACK_CLI_COMMAND = 'copilot';
 const FALLBACK_TERMINAL_NAME = 'Copilot CLI';
+const MAX_CAPTURED_SHELL_OUTPUT_LENGTH = 64 * 1024;
 
 type WorkspaceFolderLike<T> = { uri: T };
 type WorkspaceLike<T> = {
@@ -41,6 +42,22 @@ function buildCommandNotFoundPatterns(command: string): RegExp[] {
     new RegExp(`\\b${escapedName}\\b.*not found`, 'i'),
     new RegExp(`\\b${escapedName}\\b.*cannot find the file`, 'i'),
   ];
+}
+
+/** Keeps only the most recent terminal output needed for post-execution diagnostics. */
+export function appendBoundedOutput(
+  currentOutput: string,
+  chunk: string,
+  maxLength = MAX_CAPTURED_SHELL_OUTPUT_LENGTH,
+): string {
+  if (maxLength <= 0) {
+    return '';
+  }
+
+  const combinedOutput = currentOutput + chunk;
+  return combinedOutput.length <= maxLength
+    ? combinedOutput
+    : combinedOutput.slice(-maxLength);
 }
 
 /** Returns a trimmed CLI command with a safe fallback. */
@@ -126,15 +143,15 @@ export function isGitHubCopilotChatBootstrapper(explicitPath: string): boolean {
 }
 
 /**
- * Returns whether `command` is the unmodified default (`copilot`, with no explicit path,
- * arguments, or quoting). On Windows this bare name can resolve, via PATH, to GitHub's Copilot
+ * Returns whether `command` is the bare default (`copilot`, case-insensitive, with no explicit
+ * path, arguments, or quoting). On Windows this bare name can resolve, via PATH, to GitHub's Copilot
  * Chat bootstrapper instead of the real Copilot CLI binary if that bootstrapper's directory
  * appears earlier on PATH — a known, reported hang. This check is a text-only heuristic: it
  * flags the condition that makes the hang *possible*, not a confirmed resolution, since
  * confirming it would require filesystem access this extension intentionally does not perform.
  */
 export function isDefaultBareCopilotCommand(command: string): boolean {
-  return command.trim() === FALLBACK_CLI_COMMAND;
+  return command.trim().toLowerCase() === FALLBACK_CLI_COMMAND;
 }
 
 /**
@@ -230,4 +247,4 @@ export function resolveTerminalCwd<T>(
   return activeWorkspaceFolder?.uri ?? workspace.workspaceFolders?.[0]?.uri;
 }
 
-export { FALLBACK_CLI_COMMAND, FALLBACK_TERMINAL_NAME };
+export { FALLBACK_CLI_COMMAND, FALLBACK_TERMINAL_NAME, MAX_CAPTURED_SHELL_OUTPUT_LENGTH };

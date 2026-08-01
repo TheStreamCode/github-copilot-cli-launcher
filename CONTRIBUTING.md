@@ -4,15 +4,21 @@ Thanks for your interest in improving Copilot CLI Launcher.
 
 ## Development
 
+Use Node.js 22 and the npm version bundled with it. Install the exact dependency graph from the lockfile, then run the complete validation suite:
+
 ```bash
-npm install
+npm ci
 npm run check
+npm run audit
 ```
 
-Keep changes focused and covered by tests. Do not add official GitHub, Microsoft, or Copilot logos, marks, screenshots, or branding assets unless you have permission to use them.
+`npm run check` compiles from a clean `out/` directory, runs unit and metadata tests, launches the VS Code integration smoke test, and verifies the VSIX file list. Use `npm run package` to build a local VSIX after the checks pass.
+
+Keep changes focused and covered by tests. Update `README.md` and `CHANGELOG.md` when behavior changes. Do not add official GitHub, Microsoft, or Copilot logos, marks, screenshots, or branding assets unless you have permission to use them.
 
 ## Pull Requests
 
 - Keep user-facing behavior documented in `README.md`.
 - Add or update tests for launcher behavior and package metadata.
-- Run `npm run check` before submitting changes.
+- Keep generated files, local VSIX packages, credentials, and editor state out of commits.
+- Run `npm run check` and `npm run audit` before submitting changes.

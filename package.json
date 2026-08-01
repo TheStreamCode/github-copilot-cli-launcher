@@ -3,7 +3,8 @@
   "displayName": "Copilot CLI Launcher — Run GitHub Copilot in a Side Terminal",
   "description": "Launch the GitHub Copilot CLI coding agent in a side terminal from your editor toolbar — one click, fresh terminal. Unofficial; works in VS Code, Cursor & Windsurf on Windows, macOS & Linux.",
   "publisher": "mikesoft",
-  "version": "0.2.8",
+  "version": "0.2.9",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/TheStreamCode/github-copilot-cli-launcher.git"
@@ -64,8 +65,8 @@
         "title": "Open Copilot CLI in Side Terminal",
         "category": "Copilot CLI Launcher",
         "icon": {
-          "light": "./media/launcher-mark.svg",
-          "dark": "./media/launcher-mark.svg"
+          "light": "./media/icon.png",
+          "dark": "./media/icon.png"
         }
       },
       {
@@ -101,16 +102,18 @@
     }
   },
   "scripts": {
-    "compile": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
-    "watch": "node ./node_modules/typescript/bin/tsc --watch -p . --pretty false",
-    "test": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js",
-    "test:unit": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js",
-    "test:command-utils": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/command-utils.test.js",
-    "test:integration": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node ./test/integration/runTest.js",
-    "test:metadata": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/metadata.test.js",
-    "vscode:prepublish": "node ./node_modules/typescript/bin/tsc -p . --pretty false",
+    "clean": "node -e \"require('node:fs').rmSync('out', { recursive: true, force: true })\"",
+    "compile": "npm run clean && node ./node_modules/typescript/bin/tsc -p . --pretty false",
+    "watch": "npm run clean && node ./node_modules/typescript/bin/tsc --watch -p . --pretty false",
+    "test": "npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js",
+    "test:unit": "npm run compile && node --test test/*.test.js",
+    "test:command-utils": "npm run compile && node --test test/command-utils.test.js",
+    "test:integration": "npm run compile && node ./test/integration/runTest.js",
+    "test:metadata": "node --test test/metadata.test.js",
+    "audit": "npm audit --audit-level=high",
+    "vscode:prepublish": "npm run compile",
     "package": "node ./node_modules/@vscode/vsce/vsce package",
-    "check": "node ./node_modules/typescript/bin/tsc -p . --pretty false && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls"
+    "check": "npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

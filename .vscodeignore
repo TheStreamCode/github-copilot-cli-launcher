@@ -6,6 +6,7 @@ node_modules/**
 .git/**
 .gitignore
 .github/**
+AGENTS.md
 .copilot/**
 .vscode/**
 .vsce/**
@@ -13,7 +14,6 @@ node_modules/**
 *.log
 Screenshot_*.jpeg
 out/**/*.map
-out/install-utils.js
 *.tsbuildinfo
 tsconfig.json
 package-lock.json

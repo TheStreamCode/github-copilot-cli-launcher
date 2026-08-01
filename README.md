@@ -21,7 +21,7 @@ A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in
 - **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
 - **Official installation guidance** — when shell integration detects a missing CLI command, opens GitHub's official installation documentation on request
 - **Configurable** — customize the CLI command and terminal label via VS Code settings
-- **Marketplace-ready visuals** — refreshed icon and toolbar mark are bundled with the extension package
+- **Optimized bundled visuals** — the same product artwork powers the Marketplace and toolbar while keeping the VSIX compact
 - **Windows-ready** — supports quoted executable paths with spaces
 - **Privacy-first** — no telemetry, analytics, or personal data collection
 
@@ -129,15 +129,15 @@ The extension ships its bundled visual assets inside the VSIX package and does n
 ## Development
 
 ```bash
-npm install
+npm ci
 npm run check
-npm run test:integration
+npm run audit
 npm run package
 ```
 
 `npm run package` creates the `.vsix` file in the workspace root.
 
-The repository includes unit tests, metadata checks, VS Code integration smoke tests, and CI coverage for Windows and Linux.
+`npm run check` starts from a clean build, then runs unit tests, metadata checks, a VS Code integration smoke test, and a package-content validation. CI repeats those checks on Windows and Linux and rejects high-severity dependency advisories.
 
 ## Support
 

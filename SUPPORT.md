@@ -4,7 +4,7 @@
 
 Open a GitHub issue for bugs and feature requests:
 
-- [GitHub Issues](https://github.com/TheStreamCode/vscode-copilot-cli-launcher/issues)
+- [GitHub Issues](https://github.com/TheStreamCode/github-copilot-cli-launcher/issues)
 
 When reporting a bug, please include:
 

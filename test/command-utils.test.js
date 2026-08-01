@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
+  appendBoundedOutput,
   normalizeCliCommand,
   buildTerminalName,
   buildExtensionSettingsQuery,
@@ -15,6 +16,12 @@ const {
   shouldConfirmBootstrapperLaunch,
   resolveBootstrapperPromptSelection,
 } = require('../out/command-utils.js');
+
+// appendBoundedOutput
+test('appendBoundedOutput retains recent diagnostics without unbounded growth', () => {
+  assert.equal(appendBoundedOutput('12345', '67890', 8), '34567890');
+  assert.equal(appendBoundedOutput('existing', 'output', 0), '');
+});
 
 // normalizeCliCommand
 test('normalizeCliCommand trims configured values', () => {
@@ -160,6 +167,10 @@ test('isDefaultBareCopilotCommand is true for the unmodified default command', (
 
 test('isDefaultBareCopilotCommand tolerates surrounding whitespace', () => {
   assert.equal(isDefaultBareCopilotCommand('  copilot  '), true);
+});
+
+test('isDefaultBareCopilotCommand follows Windows case-insensitive command resolution', () => {
+  assert.equal(isDefaultBareCopilotCommand('COPILOT'), true);
 });
 
 test('isDefaultBareCopilotCommand is false when arguments are appended', () => {
