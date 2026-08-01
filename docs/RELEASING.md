@@ -37,6 +37,10 @@ Create the GitHub Release from that tag, use the matching changelog section as r
 
 Provide `OVSX_PAT` through an approved environment or CI secret store. Never pass the token as a command argument or commit it to the repository.
 
+For the standard repository flow, save it as the GitHub Actions secret `OVSX_PAT`, then manually dispatch **Publish Open VSX** with the existing GitHub Release tag. The workflow downloads and publishes that release's verified VSIX asset and confirms the registry version.
+
+For an authorized local fallback:
+
 ```powershell
 npx --yes ovsx verify-pat mikesoft
 npx --yes ovsx publish --packagePath $vsixPath

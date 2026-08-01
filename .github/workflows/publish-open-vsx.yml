@@ -1,0 +1,70 @@
+name: Publish Open VSX
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag to publish
+        required: true
+        default: v0.2.9
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-open-vsx-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+
+      - name: Download verified GitHub Release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          mkdir -p .vsce
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'vscode-copilot-cli-launcher-*.vsix' \
+            --dir .vsce
+          test "$(find .vsce -maxdepth 1 -name '*.vsix' | wc -l)" -eq 1
+
+      - name: Verify Open VSX credential
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          test -n "$OVSX_PAT"
+          npx --yes ovsx@1.0.2 verify-pat mikesoft
+
+      - name: Publish release asset
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx --yes ovsx@1.0.2 publish --packagePath "$(find .vsce -maxdepth 1 -name '*.vsix' -print -quit)"
+
+      - name: Verify live version
+        env:
+          EXPECTED_VERSION: ${{ inputs.tag }}
+        run: |
+          expected="${EXPECTED_VERSION#v}"
+          for attempt in {1..12}; do
+            current="$(curl --fail --silent --show-error \
+              https://open-vsx.org/api/mikesoft/vscode-copilot-cli-launcher \
+              | jq -r '.version')"
+            if [ "$current" = "$expected" ]; then
+              echo "Open VSX is live at version $current."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Expected Open VSX version $expected, but found $current." >&2
+          exit 1
