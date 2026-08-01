@@ -238,6 +238,63 @@ export function shouldShowMissingCliGuidance(command: string, exitCode: number |
   return buildCommandNotFoundPatterns(command).some((pattern) => pattern.test(output));
 }
 
+/** Minimal structural shape of a VS Code disposable, kept free of the `vscode` module. */
+export type DisposableLike = { dispose(): void };
+
+/** Tracks short-lived disposables and releases each entry as soon as it is disposed. */
+export type DisposableRegistry = {
+  /** Registers `disposable` and returns a handle that disposes and deregisters it exactly once. */
+  track(disposable: DisposableLike): DisposableLike;
+  /** Disposes every entry that is still pending and empties the registry. */
+  disposeAll(): void;
+  /** Number of entries still pending. */
+  size(): number;
+};
+
+/**
+ * Creates a registry for disposables whose lifetime is shorter than the extension's.
+ *
+ * VS Code drains `ExtensionContext.subscriptions` only at deactivate, so pushing per-launch
+ * listeners and timers there grows that array on every launch and keeps their closures — including
+ * captured terminal output — alive for the rest of the session. Entries registered here deregister
+ * themselves the moment they are disposed, so the registry stays proportional to the work that is
+ * actually still in flight, while {@link DisposableRegistry.disposeAll} still guarantees cleanup at
+ * shutdown through a single `subscriptions` entry.
+ */
+export function createDisposableRegistry(): DisposableRegistry {
+  const pending = new Set<DisposableLike>();
+
+  return {
+    track(disposable: DisposableLike): DisposableLike {
+      const handle: DisposableLike = {
+        dispose: () => {
+          if (!pending.delete(handle)) {
+            return;
+          }
+
+          disposable.dispose();
+        },
+      };
+
+      pending.add(handle);
+
+      return handle;
+    },
+
+    disposeAll(): void {
+      for (const handle of [...pending]) {
+        handle.dispose();
+      }
+
+      pending.clear();
+    },
+
+    size(): number {
+      return pending.size;
+    },
+  };
+}
+
 /** Resolves the terminal cwd from the active editor or the first workspace folder. */
 export function resolveTerminalCwd<T>(
   activeEditor: ActiveEditorLike<T> | undefined,

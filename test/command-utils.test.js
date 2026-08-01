@@ -15,7 +15,16 @@ const {
   classifyBootstrapperRisk,
   shouldConfirmBootstrapperLaunch,
   resolveBootstrapperPromptSelection,
+  createDisposableRegistry,
 } = require('../out/command-utils.js');
+
+/** Builds a disposable that records how many times it was disposed. */
+function countingDisposable() {
+  const state = { disposeCount: 0 };
+  state.disposable = { dispose: () => { state.disposeCount += 1; } };
+
+  return state;
+}
 
 // appendBoundedOutput
 test('appendBoundedOutput retains recent diagnostics without unbounded growth', () => {
@@ -260,6 +269,79 @@ test('resolveBootstrapperPromptSelection blocks without acknowledging on a bare 
     resolveBootstrapperPromptSelection('possible-default', undefined),
     { proceed: false, acknowledgePossibleDefault: false, action: 'none' },
   );
+});
+
+// createDisposableRegistry
+test('createDisposableRegistry starts empty', () => {
+  assert.equal(createDisposableRegistry().size(), 0);
+});
+
+test('createDisposableRegistry disposes the tracked disposable through its handle', () => {
+  const registry = createDisposableRegistry();
+  const entry = countingDisposable();
+
+  const handle = registry.track(entry.disposable);
+  assert.equal(registry.size(), 1);
+  assert.equal(entry.disposeCount, 0);
+
+  handle.dispose();
+  assert.equal(entry.disposeCount, 1);
+});
+
+test('createDisposableRegistry releases entries as they are disposed instead of growing per launch', () => {
+  const registry = createDisposableRegistry();
+
+  for (let launch = 0; launch < 100; launch += 1) {
+    const entry = countingDisposable();
+    registry.track(entry.disposable).dispose();
+    assert.equal(entry.disposeCount, 1);
+  }
+
+  assert.equal(registry.size(), 0);
+});
+
+test('createDisposableRegistry ignores repeated disposal of the same handle', () => {
+  const registry = createDisposableRegistry();
+  const entry = countingDisposable();
+
+  const handle = registry.track(entry.disposable);
+  handle.dispose();
+  handle.dispose();
+
+  assert.equal(entry.disposeCount, 1);
+  assert.equal(registry.size(), 0);
+});
+
+test('createDisposableRegistry keeps independent entries isolated', () => {
+  const registry = createDisposableRegistry();
+  const first = countingDisposable();
+  const second = countingDisposable();
+
+  const firstHandle = registry.track(first.disposable);
+  registry.track(second.disposable);
+  firstHandle.dispose();
+
+  assert.equal(first.disposeCount, 1);
+  assert.equal(second.disposeCount, 0);
+  assert.equal(registry.size(), 1);
+});
+
+test('createDisposableRegistry disposeAll drains everything still pending exactly once', () => {
+  const registry = createDisposableRegistry();
+  const disposed = countingDisposable();
+  const pending = countingDisposable();
+
+  registry.track(disposed.disposable).dispose();
+  registry.track(pending.disposable);
+
+  registry.disposeAll();
+
+  assert.equal(disposed.disposeCount, 1);
+  assert.equal(pending.disposeCount, 1);
+  assert.equal(registry.size(), 0);
+
+  registry.disposeAll();
+  assert.equal(pending.disposeCount, 1);
 });
 
 // resolveTerminalCwd

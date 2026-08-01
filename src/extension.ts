@@ -5,6 +5,7 @@ import {
   buildExtensionSettingsQuery,
   buildTerminalName,
   classifyBootstrapperRisk,
+  createDisposableRegistry,
   normalizeTerminalName,
   resolveBootstrapperPromptSelection,
   resolveCliCommandSetting,
@@ -17,7 +18,19 @@ const SETTINGS_NAMESPACE = 'copilotCliLauncher';
 const COPILOT_DOCS_URL = 'https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli';
 const BOOTSTRAPPER_HANG_DOCS_URL = 'https://github.com/TheStreamCode/github-copilot-cli-launcher#known-issue-github-copilot-chat-bootstrapper-hang';
 
+/** How long a launch waits for terminal shell integration before falling back to `sendText`. */
+const SHELL_INTEGRATION_TIMEOUT_MS = 3000;
+
 let terminalSequence = 1;
+
+/**
+ * Listeners and timers that belong to a single launch. They must never be pushed straight onto
+ * `context.subscriptions`, which VS Code drains only at deactivate: that would append entries on
+ * every toolbar click and pin each launch's captured terminal output for the rest of the session.
+ * The registry drops entries as they are disposed, and `activate` registers one aggregate
+ * disposable so anything still in flight is released at shutdown.
+ */
+const launchDisposables = createDisposableRegistry();
 
 /**
  * Tracks whether the user has explicitly clicked "Launch Anyway" for the `possible-default` risk
@@ -55,10 +68,15 @@ async function openCopilotInstallInstructions(): Promise<void> {
 function executeCommandWithOptionalShellIntegration(
   terminal: vscode.Terminal,
   command: string,
-  context: vscode.ExtensionContext,
   onShellExecutionEnd?: (event: vscode.TerminalShellExecutionEndEvent, output: string) => void | Promise<void>,
 ): void {
   let executionStarted = false;
+  let executionListener: vscode.Disposable | undefined;
+
+  const stopWaitingForShellIntegration = () => {
+    shellIntegrationListener.dispose();
+    fallbackTimer.dispose();
+  };
 
   const startExecution = (shellIntegration: vscode.TerminalShellIntegration) => {
     if (executionStarted) {
@@ -66,39 +84,39 @@ function executeCommandWithOptionalShellIntegration(
     }
 
     executionStarted = true;
-    shellIntegrationListener.dispose();
-    clearTimeout(fallbackHandle);
+    stopWaitingForShellIntegration();
 
     let execution: vscode.TerminalShellExecution | undefined;
     let outputPromise: Promise<string> | undefined;
 
-    const executionListener = onShellExecutionEnd
-      ? vscode.window.onDidEndTerminalShellExecution(async (endEvent) => {
-        if (endEvent.terminal !== terminal || (execution && endEvent.execution !== execution)) {
-          return;
-        }
+    if (onShellExecutionEnd) {
+      executionListener = launchDisposables.track(
+        vscode.window.onDidEndTerminalShellExecution(async (endEvent) => {
+          if (endEvent.terminal !== terminal || (execution && endEvent.execution !== execution)) {
+            return;
+          }
 
-        executionListener?.dispose();
-        const output = outputPromise ? await outputPromise : '';
-        await onShellExecutionEnd(endEvent, output);
-      })
-      : undefined;
-
-    if (executionListener) {
-      context.subscriptions.push(executionListener);
+          executionListener?.dispose();
+          closeListener.dispose();
+          const output = outputPromise ? await outputPromise : '';
+          await onShellExecutionEnd(endEvent, output);
+        }),
+      );
     }
 
     execution = shellIntegration.executeCommand(command);
     outputPromise = collectShellExecutionOutput(execution);
   };
 
-  const shellIntegrationListener = vscode.window.onDidChangeTerminalShellIntegration((event) => {
-    if (event.terminal !== terminal) {
-      return;
-    }
+  const shellIntegrationListener = launchDisposables.track(
+    vscode.window.onDidChangeTerminalShellIntegration((event) => {
+      if (event.terminal !== terminal) {
+        return;
+      }
 
-    startExecution(event.shellIntegration);
-  });
+      startExecution(event.shellIntegration);
+    }),
+  );
 
   const fallbackHandle = setTimeout(() => {
     if (terminal.shellIntegration) {
@@ -107,19 +125,30 @@ function executeCommandWithOptionalShellIntegration(
     }
 
     executionStarted = true;
-    shellIntegrationListener.dispose();
+    stopWaitingForShellIntegration();
+    closeListener.dispose();
     terminal.sendText(command, true);
-  }, 3000);
+  }, SHELL_INTEGRATION_TIMEOUT_MS);
+
+  const fallbackTimer = launchDisposables.track({ dispose: () => clearTimeout(fallbackHandle) });
+
+  // A terminal the user already closed can neither run the command nor report that it is missing.
+  const closeListener = launchDisposables.track(
+    vscode.window.onDidCloseTerminal((closedTerminal) => {
+      if (closedTerminal !== terminal) {
+        return;
+      }
+
+      executionStarted = true;
+      stopWaitingForShellIntegration();
+      executionListener?.dispose();
+      closeListener.dispose();
+    }),
+  );
 
   if (terminal.shellIntegration) {
     startExecution(terminal.shellIntegration);
-    return;
   }
-
-  context.subscriptions.push(
-    shellIntegrationListener,
-    { dispose: () => clearTimeout(fallbackHandle) },
-  );
 }
 
 async function handleMissingCopilot(cliCommand: string): Promise<void> {
@@ -184,11 +213,10 @@ async function confirmBootstrapperLaunch(cliCommand: string, context: vscode.Ext
   return outcome.proceed;
 }
 
-function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string, context: vscode.ExtensionContext): void {
+function watchForMissingCopilot(terminal: vscode.Terminal, cliCommand: string): void {
   executeCommandWithOptionalShellIntegration(
     terminal,
     cliCommand,
-    context,
     async (endEvent, output) => {
       if (shouldShowMissingCliGuidance(cliCommand, endEvent.exitCode, output)) {
         await handleMissingCopilot(cliCommand);
@@ -239,7 +267,7 @@ export function activate(context: vscode.ExtensionContext): void {
       cwd,
     });
     terminal.show();
-    watchForMissingCopilot(terminal, cliCommand, context);
+    watchForMissingCopilot(terminal, cliCommand);
     void vscode.window.setStatusBarMessage(`Started ${terminalBaseName}`, 2500);
   });
 
@@ -247,8 +275,13 @@ export function activate(context: vscode.ExtensionContext): void {
     await openExtensionSettings(context);
   });
 
-  context.subscriptions.push(openCliCommand, openSettingsCommand);
+  context.subscriptions.push(
+    openCliCommand,
+    openSettingsCommand,
+    { dispose: () => launchDisposables.disposeAll() },
+  );
 }
 
 export function deactivate(): void {
+  launchDisposables.disposeAll();
 }
