@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Extracted the launch disposable registry into `command-utils.ts` as a pure, unit-tested helper and named the shell-integration fallback delay constant.
 - Documented the packaging, publishing, validation, and asset rules for the repository in `AGENTS.md`.
+- Recorded the two reviewed release-tool install scripts with exact-version npm `allowScripts` entries and added a metadata regression test that keeps the manifest, lockfile, citation, changelog, and Open VSX workflow version synchronized.
 
 ### Added
 

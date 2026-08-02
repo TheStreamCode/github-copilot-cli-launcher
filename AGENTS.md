@@ -22,6 +22,9 @@ no internal endpoints, customer data, credentials, or unreleased claims.
 - Tooling runtime: **Node.js 22** (the version CI uses).
 - Package manager: **npm**, with the committed `package-lock.json`. Do not introduce a second
   package manager, lockfile, or a `packageManager` field — a metadata test asserts its absence.
+- npm install scripts are denied unless their exact package version appears in `allowScripts`.
+  Review the script before approving it with `npm approve-scripts`; never broaden an existing
+  approval or carry it to a new dependency version without re-reviewing that version.
 - No runtime dependencies. Everything in `devDependencies` is build, test, or packaging tooling.
 
 ## Source Layout
@@ -144,6 +147,8 @@ target registry after publication:
    `package.json`, and the root documentation and licence files — no sources, tests, maps,
    lockfile, or local tooling.
 5. Version references are synchronized and `CHANGELOG.md` has a dated entry with real changes only.
+6. `npm ci` emits no pending `allowScripts` warning; any newly requested install script is reviewed
+   and pinned to its exact package version before approval.
 
 ## Instructions for AI Agents
 

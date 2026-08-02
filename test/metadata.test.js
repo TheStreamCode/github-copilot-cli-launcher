@@ -16,6 +16,11 @@ function readPackageJson() {
   return JSON.parse(readText('package.json'));
 }
 
+/** Escapes a literal value before embedding it in a regular expression. */
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /** Returns non-empty ignore entries for line-based assertions. */
 function readIgnoreEntries(relativePath) {
   return readText(relativePath)
@@ -101,6 +106,25 @@ test('package scripts use deterministic local tooling entry points', () => {
   assert.equal(packageJson.scripts.audit, 'npm audit --audit-level=high');
   assert.equal(packageJson.scripts.check, 'npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls');
   assert.equal(packageJson.scripts.package, 'node ./node_modules/@vscode/vsce/vsce package');
+  assert.deepEqual(packageJson.allowScripts, {
+    '@vscode/vsce-sign@2.0.9': true,
+    'keytar@7.9.0': true,
+  });
+});
+
+test('release metadata versions stay synchronized', () => {
+  const packageJson = readPackageJson();
+  const packageLock = JSON.parse(readText('package-lock.json'));
+  const citation = readText('CITATION.cff');
+  const changelog = readText('CHANGELOG.md');
+  const openVsxWorkflow = readText('.github/workflows/publish-open-vsx.yml');
+  const version = escapeRegExp(packageJson.version);
+
+  assert.equal(packageLock.version, packageJson.version);
+  assert.equal(packageLock.packages[''].version, packageJson.version);
+  assert.match(citation, new RegExp(`^version: ["']?${version}["']?\\s*$`, 'm'));
+  assert.match(changelog, new RegExp(`^## \\[${version}\\] - \\d{4}-\\d{2}-\\d{2}$`, 'm'));
+  assert.match(openVsxWorkflow, new RegExp(`^\\s*default: v${version}\\s*$`, 'm'));
 });
 
 test('README is organized around user-facing setup, configuration, and troubleshooting', () => {

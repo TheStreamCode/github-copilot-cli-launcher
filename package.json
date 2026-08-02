@@ -121,5 +121,9 @@
     "@vscode/test-electron": "^3.0.0",
     "@vscode/vsce": "^3.9.2",
     "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "@vscode/vsce-sign@2.0.9": true,
+    "keytar@7.9.0": true
   }
 }
