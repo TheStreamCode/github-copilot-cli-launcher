@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.11] - 2026-08-08
+
 ### Changed
 
 - Reorganized the README around a concise product overview, direct installation links, verified compatibility boundaries, and a compact security and privacy summary; moved detailed diagnostics into a dedicated troubleshooting guide.
@@ -214,6 +216,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Smart working directory resolution from the active editor.
 - Windows, macOS, and Linux support.
 
-[Unreleased]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.10...HEAD
+[Unreleased]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.11...HEAD
+[0.2.11]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/TheStreamCode/github-copilot-cli-launcher/compare/v0.2.8...v0.2.9
