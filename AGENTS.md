@@ -19,9 +19,10 @@ no internal endpoints, customer data, credentials, or unreleased claims.
   `target: ES2022`, `strict: true`.
 - Runtime: the VS Code extension host. Declared engine floor is `^1.103.0`; `@types/vscode` must
   stay aligned with it.
-- Tooling runtime: **Node.js 22** (the version CI uses).
-- Package manager: **npm**, with the committed `package-lock.json`. Do not introduce a second
-  package manager, lockfile, or a `packageManager` field — a metadata test asserts its absence.
+- Tooling runtime: **Node.js 22** with **npm 11.16.0** (the versions CI uses).
+- Package manager: **npm 11.16.0**, with the committed `package-lock.json`. Do not introduce a
+  second package manager, lockfile, or a `packageManager` field — a metadata test asserts its
+  absence.
 - npm install scripts are denied unless their exact package version appears in `allowScripts`.
   Review the script before approving it with `npm approve-scripts`; never broaden an existing
   approval or carry it to a new dependency version without re-reviewing that version.
@@ -46,7 +47,7 @@ no internal endpoints, customer data, credentials, or unreleased claims.
 ## Required Commands
 
 ```powershell
-npm ci
+npm ci --strict-allow-scripts
 npm run check
 npm run audit
 ```
@@ -58,7 +59,7 @@ npm run audit
 - Build a release candidate only after those pass:
 
 ```powershell
-npm run package -- --out .vsce/vscode-copilot-cli-launcher-<version>.vsix
+npm run package -- -- --out .vsce/vscode-copilot-cli-launcher-<version>.vsix
 ```
 
 ## Generated and Ignored Files
@@ -140,15 +141,15 @@ target registry after publication:
 
 ## Mandatory Validation Before Handoff
 
-1. `npm ci` succeeds from the committed lockfile.
+1. `npm ci --strict-allow-scripts` succeeds from the committed lockfile.
 2. `npm run check` passes end to end (compile, unit, metadata, integration, `vsce ls`).
 3. `npm run audit` reports no high-severity advisories.
 4. `npm run package` produces a VSIX whose file list contains only `out/*.js`, `media/icon.png`,
    `package.json`, and the root documentation and licence files — no sources, tests, maps,
    lockfile, or local tooling.
 5. Version references are synchronized and `CHANGELOG.md` has a dated entry with real changes only.
-6. `npm ci` emits no pending `allowScripts` warning; any newly requested install script is reviewed
-   and pinned to its exact package version before approval.
+6. `npm ci --strict-allow-scripts` emits no pending `allowScripts` warning; any newly requested
+   install script is reviewed and pinned to its exact package version before approval.
 
 ## Instructions for AI Agents
 

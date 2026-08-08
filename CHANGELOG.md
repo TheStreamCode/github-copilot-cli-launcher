@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Reorganized the README around a concise product overview, direct installation links, verified compatibility boundaries, and a compact security and privacy summary; moved detailed diagnostics into a dedicated troubleshooting guide.
+- Corrected npm 11 argument forwarding in the documented release-candidate packaging command so `vsce` receives the requested output path.
+- Pinned CI and contributor tooling to npm 11.16.0 and made clean installs fail when a dependency install script is not covered by the exact-version `allowScripts` policy.
+- Hardened the Open VSX workflow to verify the release tag, exact asset name, GitHub SHA-256 digest, and packaged extension identity before publishing.
+
+### Security
+
+- Updated the lockfile to resolve high-severity development-tooling advisories in `fast-uri`, `js-yaml`, and `undici` without adding runtime dependencies.
+
 ## [0.2.10] - 2026-08-01
 
 ### Fixed

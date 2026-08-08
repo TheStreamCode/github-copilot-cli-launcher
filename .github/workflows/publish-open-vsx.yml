@@ -27,17 +27,50 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Download verified GitHub Release asset
+      - name: Download and verify GitHub Release asset
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Release tag must use the stable vMAJOR.MINOR.PATCH format." >&2
+            exit 1
+          fi
+
+          expected="${RELEASE_TAG#v}"
+          asset_name="vscode-copilot-cli-launcher-${expected}.vsix"
+          asset_path=".vsce/${asset_name}"
           mkdir -p .vsce
+
+          release_digest="$(gh release view "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json assets \
+            --jq '.assets[] | select(.name == "'"$asset_name"'") | .digest')"
+          if [[ ! "$release_digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "GitHub Release asset is missing an exact SHA-256 digest." >&2
+            exit 1
+          fi
+
           gh release download "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --pattern 'vscode-copilot-cli-launcher-*.vsix' \
+            --pattern "$asset_name" \
             --dir .vsce
-          test "$(find .vsce -maxdepth 1 -name '*.vsix' | wc -l)" -eq 1
+
+          actual_digest="sha256:$(sha256sum "$asset_path" | cut -d ' ' -f 1)"
+          if [ "$actual_digest" != "$release_digest" ]; then
+            echo "Downloaded VSIX does not match the GitHub Release digest." >&2
+            exit 1
+          fi
+
+          package_name="$(unzip -p "$asset_path" extension/package.json | jq -r '.name')"
+          package_publisher="$(unzip -p "$asset_path" extension/package.json | jq -r '.publisher')"
+          package_version="$(unzip -p "$asset_path" extension/package.json | jq -r '.version')"
+          test "$package_name" = 'vscode-copilot-cli-launcher'
+          test "$package_publisher" = 'mikesoft'
+          test "$package_version" = "$expected"
+
+          echo "VSIX_PATH=$asset_path" >> "$GITHUB_ENV"
+          echo "EXPECTED_VERSION=$expected" >> "$GITHUB_ENV"
 
       - name: Verify Open VSX credential
         env:
@@ -49,22 +82,19 @@ jobs:
       - name: Publish release asset
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: npx --yes ovsx@1.0.2 publish --packagePath "$(find .vsce -maxdepth 1 -name '*.vsix' -print -quit)"
+        run: npx --yes ovsx@1.0.2 publish --packagePath "$VSIX_PATH"
 
       - name: Verify live version
-        env:
-          EXPECTED_VERSION: ${{ inputs.tag }}
         run: |
-          expected="${EXPECTED_VERSION#v}"
           for attempt in {1..12}; do
             current="$(curl --fail --silent --show-error \
               https://open-vsx.org/api/mikesoft/vscode-copilot-cli-launcher \
               | jq -r '.version')"
-            if [ "$current" = "$expected" ]; then
+            if [ "$current" = "$EXPECTED_VERSION" ]; then
               echo "Open VSX is live at version $current."
               exit 0
             fi
             sleep 5
           done
-          echo "Expected Open VSX version $expected, but found $current." >&2
+          echo "Expected Open VSX version $EXPECTED_VERSION, but found $current." >&2
           exit 1

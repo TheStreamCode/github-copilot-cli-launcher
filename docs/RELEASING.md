@@ -17,12 +17,12 @@ Move completed changelog entries from `Unreleased` into a dated release section 
 ## 2. Validate from a Clean Install
 
 ```powershell
-npm ci
+npm ci --strict-allow-scripts
 npm run check
 npm run audit
 $version = node -p "require('./package.json').version"
 $vsixPath = ".vsce/vscode-copilot-cli-launcher-$version.vsix"
-npm run package -- --out $vsixPath
+npm run package -- -- --out $vsixPath
 ```
 
 Confirm that the VSIX contains only the runtime JavaScript, required metadata, licenses, documentation, and bundled product artwork.
@@ -38,6 +38,8 @@ Create the GitHub Release from that tag, use the matching changelog section as r
 Provide `OVSX_PAT` through an approved environment or CI secret store. Never pass the token as a command argument or commit it to the repository.
 
 For the standard repository flow, save it as the GitHub Actions secret `OVSX_PAT`, then manually dispatch **Publish Open VSX** with the existing GitHub Release tag. The workflow downloads and publishes that release's verified VSIX asset and confirms the registry version.
+
+Before using the publishing credential, the workflow requires a stable semantic-version tag, downloads the exact versioned asset, verifies its GitHub SHA-256 digest, and checks the packaged name, publisher, and version.
 
 For an authorized local fallback:
 

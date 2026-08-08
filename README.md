@@ -1,60 +1,69 @@
 # Copilot CLI Launcher
 
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/mikesoft.vscode-copilot-cli-launcher?label=Marketplace&color=6366F1)](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher)
-[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/mikesoft.vscode-copilot-cli-launcher?color=0EA5E9)](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher)
 [![Open VSX](https://img.shields.io/open-vsx/v/mikesoft/vscode-copilot-cli-launcher?label=Open%20VSX&color=a60ee5)](https://open-vsx.org/extension/mikesoft/vscode-copilot-cli-launcher)
 [![CI](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/TheStreamCode/github-copilot-cli-launcher/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/Sponsor-TheStreamCode-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/TheStreamCode)
 
-A VS Code extension that opens the standalone GitHub Copilot CLI coding agent in a new side terminal directly from the editor toolbar. One click, fresh terminal, ready to go.
+Launch the standalone GitHub Copilot CLI coding agent from your editor toolbar in a fresh side terminal. No terminal reuse, telemetry, installers, or background services.
+
+[Install from Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher) · [Install from Open VSX](https://open-vsx.org/extension/mikesoft/vscode-copilot-cli-launcher) · [Download the latest VSIX](https://github.com/TheStreamCode/github-copilot-cli-launcher/releases/latest)
 
 > **Disclaimer**
 > This independent extension is unofficial and is not affiliated with, endorsed by, or sponsored by GitHub or Microsoft. See [TRADEMARKS.md](TRADEMARKS.md) for trademark information.
 
-> **✨ Want one launcher for every agent?** Try **[Super CLI](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-super-cli)** — a single sidebar that launches Claude Code, Codex, Copilot, Cursor, Grok, Kilo, Antigravity, OpenCode, and more. Install this launcher for Copilot alone, or Super CLI for the whole set.
+## Why Copilot CLI Launcher
+
+- **One click, one fresh terminal** — launch Copilot CLI beside the active editor without replacing or reusing an existing terminal.
+- **The right working directory** — start in the active editor's workspace folder, with a predictable fallback for multi-root projects.
+- **Local and focused** — no telemetry, analytics, installers, filesystem scanning, or background network behavior.
+
+## Quick Start
+
+1. Install the extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher) or [Open VSX](https://open-vsx.org/extension/mikesoft/vscode-copilot-cli-launcher).
+2. Install GitHub Copilot CLI by following GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
+3. Open a file in a trusted workspace and click the launcher button in the editor title.
+
+Requires VS Code `^1.103.0` or a compatible editor and a working `copilot` command.
 
 ## Features
 
-- **Toolbar launcher** — one-click button in the editor title area to start Copilot CLI
-- **Side-by-side terminal** — opens beside the active editor, never reusing existing terminals
-- **Smart working directory** — uses the active editor's workspace folder, with fallback to the first workspace
-- **Official installation guidance** — when shell integration detects a missing CLI command, opens GitHub's official installation documentation on request
-- **Configurable** — customize the CLI command and terminal label via VS Code settings
-- **Optimized bundled visuals** — the same product artwork powers the Marketplace and toolbar while keeping the VSIX compact
-- **Windows-ready** — supports quoted executable paths with spaces
-- **Privacy-first** — no telemetry, analytics, or personal data collection
+- Toolbar command in the editor title area
+- A new side terminal for every launch
+- Active-editor workspace resolution with multi-root fallback
+- Configurable CLI command and terminal label
+- Quoted executable-path support on Windows
+- Missing-command guidance through official GitHub documentation
+- Workspace Trust enforcement and machine-scoped command configuration
 
-## Requirements
+## Compatibility
 
-- VS Code `^1.103.0`
-- GitHub Copilot CLI installed and available as `copilot`; see GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli)
-
-## Installation
-
-1. **Install the extension** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher).
-
-2. **Install GitHub Copilot CLI** using one of the methods in GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
-
-3. Open any file in VS Code and click the launcher button in the editor title.
-
-## Missing CLI Guidance
-
-Missing-command guidance depends on terminal shell integration, which lets the extension observe command completion and output. When a configured CLI command is not found, the extension can open GitHub's official Copilot CLI installation documentation in your default browser. The extension does not download software, create installer files, or run installation commands.
-
-Without shell integration, the launcher sends the configured command through its fallback path and cannot detect that the command is missing.
+| Environment | Support | Validation |
+| --- | --- | --- |
+| VS Code `^1.103.0` | Supported | Integration smoke test in CI |
+| Windows | Supported | Tested in CI; quoted executable paths are covered |
+| Linux | Supported | Tested in CI |
+| macOS | Supported | Platform-neutral implementation; not in the CI matrix |
+| Cursor and Windsurf | Compatible | Uses the VS Code extension API; not in the CI matrix |
 
 ## How It Works
 
-Each launch creates a new terminal beside the current editor and sends the configured command immediately. Existing terminals are never reused.
+Each launch creates a new terminal beside the current editor and sends the configured command exactly once. Existing terminals are never reused.
 
-The launcher uses the workspace folder of the active editor for the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder. With no workspace folder, the launcher does not set a working directory.
+The launcher uses the active editor's workspace folder as the terminal's working directory. If the active editor is outside the workspace, it falls back to the first workspace folder. With no workspace folder, it leaves the working directory unset.
 
-## Workspace Trust and Command Safety
+## Security and Privacy
 
-The launcher does not start Copilot CLI until the current workspace is trusted because it runs a terminal command in that workspace. Review workspace trust before launching Copilot CLI in a repository you do not trust.
+| Area | Behavior |
+| --- | --- |
+| Workspace Trust | The launcher will not run the command until the current workspace is trusted. |
+| Command source | `copilotCliLauncher.cliCommand` uses only its default or user/machine value; workspace-controlled values are ignored. |
+| Terminal output | Diagnostic output is bounded, kept in memory, and never persisted. |
+| Data collection | Copilot CLI Launcher does not collect telemetry, analytics, or personal data. |
+| Downloads and installation | The extension does not download software, create installer files, or run installation commands. |
+| Background activity | No filesystem scanning, automatic downloads, background services, or extension-initiated network checks. |
 
-`copilotCliLauncher.cliCommand` is a machine-scoped setting. The launcher uses only its default or user/machine value and ignores workspace-controlled values, so a workspace cannot set the command it launches.
+The configured command runs inside the selected workspace, so review Workspace Trust before launching Copilot CLI in an unfamiliar repository. The separate Copilot CLI process remains subject to GitHub's own behavior and terms.
 
 ## Configuration
 
@@ -63,9 +72,7 @@ The launcher does not start Copilot CLI until the current workspace is trusted b
 | `copilotCliLauncher.cliCommand` | `copilot` | Machine-scoped command executed when the launcher button is clicked; workspace values are ignored. |
 | `copilotCliLauncher.terminalName` | `Copilot CLI` | Base label used for the created terminal. |
 
-Open settings via the Command Palette: **Copilot CLI Launcher: Open Settings**
-
-**Examples:**
+Open settings from the Command Palette with **Copilot CLI Launcher: Open Settings**.
 
 Default command:
 
@@ -79,71 +86,38 @@ Windows executable path with spaces:
 "copilotCliLauncher.cliCommand": "\"C:\\Program Files\\GitHub Copilot\\copilot.exe\""
 ```
 
-## Known Issue: GitHub Copilot Chat Bootstrapper Hang
+## Missing CLI Guidance
 
-On Windows, if the GitHub Copilot Chat extension for VS Code is or was ever installed, it can leave a `copilot`/`copilot.bat`/`copilot.ps1` bootstrapper script under its extension global storage (`...\Code\User\globalStorage\github.copilot-chat\copilotCli\`). If that directory appears earlier on your system `PATH` than the real Copilot CLI installation, the plain `copilot` command — this launcher's default — can resolve to that bootstrapper instead of the real binary.
-
-We have observed that bootstrapper hang instead of exiting when launched from a terminal, leaving an orphaned `powershell.exe` process running indefinitely and consuming CPU. Because each launch can leave behind a new stuck process, repeated use compounds the effect on system responsiveness.
-
-This launcher cannot see which binary your shell will actually resolve `copilot` to — it only starts a terminal and sends the configured command, the same as typing it yourself. It therefore cannot silently work around the hang. Instead, it blocks the launch and asks for confirmation:
-
-- If `copilotCliLauncher.cliCommand` is explicitly set to a path inside `github.copilot-chat\copilotCli\`, every launch is blocked until you confirm.
-- If you are using the plain default `copilot` command on Windows, the first launch each VS Code session is blocked with a warning; choosing **Launch Anyway** proceeds for the rest of that session. Dismissing the warning any other way (Escape, clicking outside, "Open Settings", "Learn More") blocks that launch and asks again next time, since it does not mean you have accepted the risk.
-
-**Mitigation:** set `copilotCliLauncher.cliCommand` to the full, quoted path of your real Copilot CLI executable (for example the WinGet or npm install location) so it never depends on `PATH` order:
-
-```json
-"copilotCliLauncher.cliCommand": "\"C:\\Users\\<you>\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GitHub.Copilot_Microsoft.Winget.Source_8wekyb3d8bbwe\\copilot.exe\""
-```
-
-Find your real binary's path with `Get-Command copilot -All` in PowerShell, or `where copilot` — it lists every match on `PATH` in resolution order.
-
-This is not a bug in this launcher, the Copilot CLI binary, or your BYOK/model-switching setup; it is a hang in GitHub's own bootstrapper script when launched as a non-interactive terminal child process. If you can reproduce it outside this launcher, please report it to GitHub through the official [Copilot CLI documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli).
+When terminal shell integration is available, the extension can detect a missing configured command and offer to open GitHub's official installation documentation. Without shell integration, it sends the command through its fallback path and cannot determine whether the command exists.
 
 ## Troubleshooting
 
-### Copilot CLI is not found
+On Windows, an older GitHub Copilot Chat bootstrapper can sometimes take precedence over the real `copilot` executable and hang. The launcher warns before a potentially affected launch because it cannot inspect your `PATH` without weakening its local-only design.
 
-Follow GitHub's [official installation documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli), then verify that `copilot` is available in a regular terminal.
+The most reliable mitigation is to set `copilotCliLauncher.cliCommand` to the full, quoted path of the real executable. Use `Get-Command copilot -All` in PowerShell or `where copilot` to inspect command resolution.
 
-If your setup relies on shell initialization, restart VS Code after installation so new terminals inherit the updated environment.
-
-### Nothing happens after clicking the button
-
-Check the value of `copilotCliLauncher.cliCommand` in settings and verify that the same command works in a regular terminal.
-
-### Custom executable path on Windows
-
-Quote executable paths that contain spaces, for example: `"C:\Program Files\GitHub Copilot\copilot.exe"`.
-
-### Multi-root workspaces
-
-The launcher uses the workspace folder of the active editor. To control where Copilot CLI starts in a multi-root window, open a file from the target workspace before clicking the toolbar button.
-
-## Privacy
-
-Copilot CLI Launcher does not collect telemetry, analytics, or personal data.
-
-The extension ships its bundled visual assets inside the VSIX package and does not fetch remote images at runtime.
+For symptoms, mitigation examples, missing-command help, and multi-root behavior, see the [complete troubleshooting guide](docs/TROUBLESHOOTING.md).
 
 ## Development
 
 ```bash
-npm ci
+npm ci --strict-allow-scripts
 npm run check
 npm run audit
 npm run package
 ```
 
-`npm run package` creates the `.vsix` file in the workspace root.
+`npm run check` performs a clean compile, unit and metadata tests, a VS Code integration smoke test, and package-content validation. CI repeats the gate on Windows and Linux and rejects high-severity dependency advisories. `npm run package` creates the `.vsix` release candidate.
 
-`npm run check` starts from a clean build, then runs unit tests, metadata checks, a VS Code integration smoke test, and a package-content validation. CI repeats those checks on Windows and Linux and rejects high-severity dependency advisories.
+## Related Project
+
+Need one launcher for several coding agents? [Super CLI](https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-super-cli) provides a unified sidebar for Copilot, Claude Code, Codex, Cursor, Grok, Kilo, Antigravity, OpenCode, and more.
 
 ## Support
 
-Open a [GitHub issue](https://github.com/TheStreamCode/github-copilot-cli-launcher/issues) for bugs and feature requests. For support details, see [SUPPORT.md](SUPPORT.md).
+Open a [GitHub issue](https://github.com/TheStreamCode/github-copilot-cli-launcher/issues) for bugs and feature requests. See [SUPPORT.md](SUPPORT.md) for reporting guidance and contact options.
 
-Financial support for the independent maintainer is available through GitHub Sponsors: [github.com/sponsors/TheStreamCode](https://github.com/sponsors/TheStreamCode).
+You can support the independent maintainer through [GitHub Sponsors](https://github.com/sponsors/TheStreamCode).
 
 ## License
 

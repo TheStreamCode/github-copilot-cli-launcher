@@ -127,15 +127,23 @@ test('release metadata versions stay synchronized', () => {
   assert.match(openVsxWorkflow, new RegExp(`^\\s*default: v${version}\\s*$`, 'm'));
 });
 
-test('README is organized around user-facing setup, configuration, and troubleshooting', () => {
+test('README presents the product, trust boundaries, setup, and support clearly', () => {
   const readme = readText('README.md');
 
   assert.match(readme, /^# Copilot CLI Launcher$/m);
-  assert.match(readme, /opens the standalone GitHub Copilot CLI coding agent in a new side terminal/i);
+  assert.match(readme, /Launch the standalone GitHub Copilot CLI coding agent from your editor toolbar/i);
+  assert.match(readme, /Install from Visual Studio Marketplace/);
+  assert.match(readme, /Install from Open VSX/);
+  assert.match(readme, /Download the latest VSIX/);
+  assert.match(readme, /## Why Copilot CLI Launcher/);
+  assert.match(readme, /## Quick Start/);
   assert.match(readme, /## Features/);
+  assert.match(readme, /## Compatibility/);
+  assert.match(readme, /## Security and Privacy/);
   assert.match(readme, /## Missing CLI Guidance/);
   assert.match(readme, /## Configuration/);
   assert.match(readme, /## Troubleshooting/);
+  assert.match(readme, /docs\/TROUBLESHOOTING\.md/);
   assert.match(readme, /Copilot CLI Launcher: Open Settings/);
   assert.match(readme, /official installation documentation/i);
   assert.match(readme, /does not download software, create installer files, or run installation commands/i);
@@ -158,11 +166,23 @@ test('SUPPORT explains when to use issues and when to contact the maintainer dir
 
 test('docs directory includes an accurate engineering documentation index', () => {
   const docsReadme = readText('docs/README.md');
+  const agentGuide = readText('AGENTS.md');
+  const releasing = readText('docs/RELEASING.md');
+  const troubleshooting = readText('docs/TROUBLESHOOTING.md');
 
   assert.match(docsReadme, /^# Documentation$/m);
   assert.match(docsReadme, /root `README\.md`/);
   assert.match(docsReadme, /Add durable engineering notes here/i);
+  assert.match(docsReadme, /TROUBLESHOOTING\.md/);
   assert.doesNotMatch(docsReadme, /`(?:specs|plans)\/`/);
+
+  assert.match(troubleshooting, /^# Troubleshooting$/m);
+  assert.match(troubleshooting, /GitHub Copilot Chat Bootstrapper Hang on Windows/);
+  assert.match(troubleshooting, /## Copilot CLI Is Not Found/);
+  assert.match(troubleshooting, /## Multi-root Workspaces/);
+  assert.match(troubleshooting, /does not download software, create installer files, or run installation commands/i);
+  assert.match(agentGuide, /npm run package -- -- --out \.vsce\/vscode-copilot-cli-launcher-<version>\.vsix/);
+  assert.match(releasing, /npm run package -- -- --out \$vsixPath/);
 });
 
 test('README documents key features and privacy notes', () => {
@@ -220,10 +240,29 @@ test('CI workflow validates the extension with npm on Windows and Linux', () => 
   assert.match(workflow, /windows-latest/);
   assert.match(workflow, /ubuntu-latest/);
   assert.match(workflow, /cache: npm/);
-  assert.match(workflow, /npm ci/);
+  assert.match(workflow, /run: npm install --global npm@11\.16\.0 --ignore-scripts/);
+  assert.match(workflow, /run: npm ci --strict-allow-scripts/);
   assert.match(workflow, /npm run audit/);
   assert.match(workflow, /npm run check/);
   assert.match(workflow, /persist-credentials: false/);
+});
+
+test('Open VSX workflow verifies the release asset before publishing it', () => {
+  const workflow = readText('.github/workflows/publish-open-vsx.yml');
+  const verificationStep = workflow.indexOf('Download and verify GitHub Release asset');
+  const publishStep = workflow.indexOf('Publish release asset');
+
+  assert.ok(verificationStep >= 0);
+  assert.ok(publishStep > verificationStep);
+  assert.match(workflow, /Release tag must use the stable vMAJOR\.MINOR\.PATCH format/);
+  assert.match(workflow, /asset_name="vscode-copilot-cli-launcher-\$\{expected\}\.vsix"/);
+  assert.match(workflow, /\.assets\[\].*\.digest/);
+  assert.match(workflow, /sha256sum "\$asset_path"/);
+  assert.match(workflow, /unzip -p "\$asset_path" extension\/package\.json/);
+  assert.match(workflow, /test "\$package_name" = 'vscode-copilot-cli-launcher'/);
+  assert.match(workflow, /test "\$package_publisher" = 'mikesoft'/);
+  assert.match(workflow, /test "\$package_version" = "\$expected"/);
+  assert.match(workflow, /publish --packagePath "\$VSIX_PATH"/);
 });
 
 test('per-launch listeners stay out of the never-drained extension subscriptions array', () => {

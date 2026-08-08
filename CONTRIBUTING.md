@@ -4,10 +4,10 @@ Thanks for your interest in improving Copilot CLI Launcher.
 
 ## Development
 
-Use Node.js 22 and the npm version bundled with it. Install the exact dependency graph from the lockfile, then run the complete validation suite:
+Use Node.js 22 with npm 11.16.0. Install the exact dependency graph from the lockfile while enforcing the reviewed install-script allowlist, then run the complete validation suite:
 
 ```bash
-npm ci
+npm ci --strict-allow-scripts
 npm run check
 npm run audit
 ```
