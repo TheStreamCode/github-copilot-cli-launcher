@@ -121,4 +121,4 @@ You can support the independent maintainer through [GitHub Sponsors](https://git
 
 ## License
 
-Released under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
