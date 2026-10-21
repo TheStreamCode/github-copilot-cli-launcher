@@ -51,6 +51,9 @@ test('package metadata uses Copilot CLI Launcher branding', () => {
   assert.equal(packageJson.private, true);
   assert.equal(packageJson.packageManager, undefined);
   assert.equal(packageJson.icon, 'media/icon.png');
+  assert.equal(packageJson.repository, 'github:TheStreamCode/github-copilot-cli-launcher');
+  assert.equal(packageJson.bugs.url, 'https://github.com/TheStreamCode/github-copilot-cli-launcher/issues');
+  assert.equal(packageJson.homepage, 'https://marketplace.visualstudio.com/items?itemName=mikesoft.vscode-copilot-cli-launcher');
   assert.equal(packageJson.contributes.configuration.title, 'Copilot CLI Launcher');
 
   const [openCliCommand, openSettingsCommand] = packageJson.contributes.commands;
@@ -107,8 +110,7 @@ test('package scripts use deterministic local tooling entry points', () => {
   assert.equal(packageJson.scripts.check, 'npm run compile && node --test test/*.test.js && node ./test/integration/runTest.js && node ./node_modules/@vscode/vsce/vsce ls');
   assert.equal(packageJson.scripts.package, 'node ./node_modules/@vscode/vsce/vsce package');
   assert.deepEqual(packageJson.allowScripts, {
-    '@vscode/vsce-sign@2.0.9': true,
-    'keytar@7.9.0': true,
+    '@vscode/vsce-sign@2.1.0': true,
   });
 });
 
@@ -127,22 +129,31 @@ test('release metadata versions stay synchronized', () => {
   assert.match(openVsxWorkflow, new RegExp(`^\\s*default: v${version}\\s*$`, 'm'));
 });
 
-test('README presents the product, trust boundaries, setup, and support clearly', () => {
+test('README follows the shared section order and presents the product, trust boundaries, and support clearly', () => {
   const readme = readText('README.md');
+  const headings = [...readme.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
 
   assert.match(readme, /^# Copilot CLI Launcher$/m);
+  assert.deepEqual(headings, [
+    'Install',
+    'Quick start',
+    'Features',
+    'Requirements',
+    'Configuration',
+    'Privacy and security',
+    'Troubleshooting',
+    'Development',
+    'Support',
+    'Contributing',
+    'License',
+  ]);
+  assert.match(readme, /actions\/workflows\/ci\.yml\/badge\.svg/);
+  assert.match(readme, /License-MIT/);
+  assert.match(readme, /Maintained by \[Michael Gasperini \(Mikesoft\)\]\(https:\/\/mikesoft\.it\)/);
   assert.match(readme, /Launch the standalone GitHub Copilot CLI coding agent from your editor toolbar/i);
-  assert.match(readme, /Install from Visual Studio Marketplace/);
-  assert.match(readme, /Install from Open VSX/);
-  assert.match(readme, /Download the latest VSIX/);
-  assert.match(readme, /## Why Copilot CLI Launcher/);
-  assert.match(readme, /## Quick Start/);
-  assert.match(readme, /## Features/);
-  assert.match(readme, /## Compatibility/);
-  assert.match(readme, /## Security and Privacy/);
-  assert.match(readme, /## Missing CLI Guidance/);
-  assert.match(readme, /## Configuration/);
-  assert.match(readme, /## Troubleshooting/);
+  assert.match(readme, /\[Visual Studio Marketplace\]\(https:\/\/marketplace\.visualstudio\.com\/items\?itemName=mikesoft\.vscode-copilot-cli-launcher\)/);
+  assert.match(readme, /\[Open VSX\]\(https:\/\/open-vsx\.org\/extension\/mikesoft\/vscode-copilot-cli-launcher\)/);
+  assert.match(readme, /download the latest VSIX/i);
   assert.match(readme, /docs\/TROUBLESHOOTING\.md/);
   assert.match(readme, /Copilot CLI Launcher: Open Settings/);
   assert.match(readme, /official installation documentation/i);
