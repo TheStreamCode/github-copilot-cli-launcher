@@ -33,26 +33,24 @@ Commit and push the reviewed scope to `main`, then wait for all required GitHub 
 
 Create the GitHub Release from that tag, use the matching changelog section as release notes, and attach the verified VSIX artifact.
 
-## 4. Publish to Open VSX
+## 4. Publish to Both Registries
 
-Provide `OVSX_PAT` through an approved environment or CI secret store. Never pass the token as a command argument or commit it to the repository.
-
-For the standard repository flow, save it as the GitHub Actions secret `OVSX_PAT`, then manually dispatch **Publish Open VSX** with the existing GitHub Release tag. The workflow downloads and publishes that release's verified VSIX asset and confirms the registry version.
-
-Before using the publishing credential, the workflow requires a stable semantic-version tag, downloads the exact versioned asset, verifies its GitHub SHA-256 digest, and checks the packaged name, publisher, and version.
-
-For an authorized local fallback:
+Publishing is owner-controlled. After the GitHub Release exists, dispatch the **Release** workflow
+with the release tag:
 
 ```powershell
-npx --yes ovsx verify-pat mikesoft
-npx --yes ovsx publish --packagePath $vsixPath
+gh workflow run release.yml -f tag=v<version>
 ```
 
-After publishing, query `https://open-vsx.org/api/mikesoft/vscode-copilot-cli-launcher` and confirm that its version matches the Git tag and package metadata.
+The publish job downloads the released VSIX and its checksum, verifies the checksum, and publishes
+the same artifact to the Visual Studio Marketplace and Open VSX through OIDC trusted publishing. No
+long-lived registry token is stored in the repository or in GitHub Actions secrets.
 
-## 5. Optional Visual Studio Marketplace Publication
+After publishing, query `https://open-vsx.org/api/mikesoft/vscode-copilot-cli-launcher` and the
+Marketplace gallery API and confirm that both versions match the Git tag and package metadata.
 
-Marketplace publication is a separate authorized action. Use the official `vsce` workflow with a securely supplied publisher token, then verify the public Marketplace API rather than assuming the command completed the rollout.
+The older **Publish Open VSX** workflow remains available only as a migration fallback until the
+first trusted-publishing run succeeds.
 
 ## 6. Final Verification
 
