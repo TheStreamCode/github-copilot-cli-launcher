@@ -120,7 +120,8 @@ export function extractExecutable(command: string): string {
  * PATH) is GitHub's own `copilot`/`copilot.bat`/`copilot.ps1` bootstrapper, installed under the
  * `github.copilot-chat` extension's global storage. That bootstrapper can hang instead of
  * exiting when launched as a terminal child process, leaving an orphaned `powershell.exe`
- * process behind. See README "Known Issue: GitHub Copilot Chat Bootstrapper Hang" for details.
+ * process behind. See "GitHub Copilot Chat Bootstrapper Hang on Windows" in
+ * docs/TROUBLESHOOTING.md for details.
  *
  * This checks only the literal configured path — it never touches the filesystem or resolves
  * PATH, so it cannot detect the same hang when the command is the bare, unqualified `copilot`

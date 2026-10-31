@@ -16,7 +16,7 @@ import {
 
 const SETTINGS_NAMESPACE = 'copilotCliLauncher';
 const COPILOT_DOCS_URL = 'https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli';
-const BOOTSTRAPPER_HANG_DOCS_URL = 'https://github.com/TheStreamCode/github-copilot-cli-launcher#known-issue-github-copilot-chat-bootstrapper-hang';
+const BOOTSTRAPPER_HANG_DOCS_URL = 'https://github.com/TheStreamCode/github-copilot-cli-launcher/blob/main/docs/TROUBLESHOOTING.md#github-copilot-chat-bootstrapper-hang-on-windows';
 
 /** How long a launch waits for terminal shell integration before falling back to `sendText`. */
 const SHELL_INTEGRATION_TIMEOUT_MS = 3000;
