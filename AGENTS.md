@@ -108,10 +108,10 @@ test requires it to stay at least 256x256 and under 256 KiB.
 
 ## Environment Variables and Secrets
 
-The extension itself reads no environment variables and stores no secrets. Publishing tokens
-(`VSCE_PAT` for the Visual Studio Marketplace, `OVSX_PAT` for Open VSX) exist only as CI secrets or
-an operator's local environment. Never place them in files, command arguments, logs, pull requests,
-or shell history, and never echo their values — check only for presence.
+The extension itself reads no environment variables and stores no secrets. No long-lived publishing
+token is required: the manually dispatched Release workflow authenticates to the Visual Studio
+Marketplace and Open VSX through OIDC trusted publishing. Never place registry tokens in files,
+command arguments, logs, pull requests, or shell history.
 
 ## GitHub and CI
 
@@ -135,9 +135,11 @@ comparison links at the bottom).
 Follow [`docs/RELEASING.md`](docs/RELEASING.md), wait for required CI checks, and verify every
 target registry after publication:
 
-- Visual Studio Marketplace: `mikesoft.vscode-copilot-cli-launcher`, published with `vsce`.
-- Open VSX: `mikesoft/vscode-copilot-cli-launcher`, published by the **Publish Open VSX** workflow
-  from an existing GitHub Release asset, or with `ovsx` as an authorized local fallback.
+- Visual Studio Marketplace: `mikesoft.vscode-copilot-cli-launcher`, published by the manually
+  dispatched **Release** workflow through OIDC trusted publishing.
+- Open VSX: `mikesoft/vscode-copilot-cli-launcher`, published by the same **Release** workflow
+  from an existing GitHub Release asset. The older **Publish Open VSX** workflow is a migration
+  fallback only.
 
 ## Mandatory Validation Before Handoff
 
