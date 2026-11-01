@@ -270,6 +270,10 @@ test('release workflow verifies the released VSIX before trusted publishing', ()
   assert.match(workflow, /jq -r --arg name "\$VSIX" '\.assets\[\] \| select\(\.name == \$name\) \| \.digest'/);
   assert.match(workflow, /sha256sum "\.release\/\$VSIX"/);
   assert.match(workflow, /test "\$actual" = "\$expected"/);
+  assert.match(workflow, /unzip -p "\.release\/\$VSIX" extension\/package\.json/);
+  assert.match(workflow, /jq -r '\.publisher' vsix-package\.json/);
+  assert.match(workflow, /jq -r '\.name' vsix-package\.json/);
+  assert.match(workflow, /jq -r '\.version' vsix-package\.json/);
   assert.match(workflow, /vsce@4\.1\.0 publish/);
   assert.match(workflow, /--oidc --skip-duplicate/);
   assert.match(workflow, /ovsx@1\.3\.0 publish/);
