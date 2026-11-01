@@ -30,7 +30,7 @@ Confirm that the VSIX contains only the runtime JavaScript, required metadata, l
 
 Commit and push the reviewed scope to `main`, then wait for all required GitHub checks. Create and push the annotated `v<version>` tag only from the verified `main` commit.
 
-Create the GitHub Release from that tag, use the matching changelog section as release notes, and attach the verified VSIX artifact.
+The tag push runs the **Release** workflow, which builds and attaches the verified VSIX and its SHA-256 checksum to the GitHub Release. Use the matching changelog section as release notes if the generated notes need editing.
 
 ## 4. Publish to Both Registries
 
