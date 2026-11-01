@@ -9,7 +9,6 @@ Choose the next semantic version and keep it synchronized in:
 - `package.json` and `package-lock.json` (use `npm version <version> --no-git-tag-version`)
 - `CITATION.cff`
 - the version assertion in `test/metadata.test.js`
-- the default `tag` input of `.github/workflows/publish-open-vsx.yml`
 - `CHANGELOG.md`
 
 Move completed changelog entries from `Unreleased` into a dated release section and update the comparison links.
@@ -42,17 +41,15 @@ with the release tag:
 gh workflow run release.yml -f tag=v<version>
 ```
 
-The publish job downloads the released VSIX and its checksum, verifies the checksum, and publishes
-the same artifact to the Visual Studio Marketplace and Open VSX through OIDC trusted publishing. No
-long-lived registry token is stored in the repository or in GitHub Actions secrets.
+The publish job downloads the released VSIX and verifies its SHA-256 against the digest recorded on
+the GitHub release asset, then publishes the same artifact to the Visual Studio Marketplace and Open
+VSX through OIDC trusted publishing. No long-lived registry token is stored in the repository or in
+GitHub Actions secrets.
 
 After publishing, query `https://open-vsx.org/api/mikesoft/vscode-copilot-cli-launcher` and the
 Marketplace gallery API and confirm that both versions match the Git tag and package metadata.
 
-The older **Publish Open VSX** workflow remains available only as a migration fallback until the
-first trusted-publishing run succeeds.
-
-## 6. Final Verification
+## 5. Final Verification
 
 Record these states separately in the handoff:
 
