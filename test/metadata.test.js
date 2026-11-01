@@ -119,14 +119,12 @@ test('release metadata versions stay synchronized', () => {
   const packageLock = JSON.parse(readText('package-lock.json'));
   const citation = readText('CITATION.cff');
   const changelog = readText('CHANGELOG.md');
-  const openVsxWorkflow = readText('.github/workflows/publish-open-vsx.yml');
   const version = escapeRegExp(packageJson.version);
 
   assert.equal(packageLock.version, packageJson.version);
   assert.equal(packageLock.packages[''].version, packageJson.version);
   assert.match(citation, new RegExp(`^version: ["']?${version}["']?\\s*$`, 'm'));
   assert.match(changelog, new RegExp(`^## \\[${version}\\] - \\d{4}-\\d{2}-\\d{2}$`, 'm'));
-  assert.match(openVsxWorkflow, new RegExp(`^\\s*default: v${version}\\s*$`, 'm'));
 });
 
 test('README follows the shared section order and presents the product, trust boundaries, and support clearly', () => {
@@ -258,22 +256,30 @@ test('CI workflow validates the extension with npm on Windows and Linux', () => 
   assert.match(workflow, /persist-credentials: false/);
 });
 
-test('Open VSX workflow verifies the release asset before publishing it', () => {
-  const workflow = readText('.github/workflows/publish-open-vsx.yml');
-  const verificationStep = workflow.indexOf('Download and verify GitHub Release asset');
-  const publishStep = workflow.indexOf('Publish release asset');
+test('release workflow verifies the released VSIX before trusted publishing', () => {
+  const workflow = readText('.github/workflows/release.yml');
+  const verificationStep = workflow.indexOf('Download and verify the released VSIX');
+  const publishStep = workflow.indexOf('Publish to Visual Studio Marketplace');
 
+  assert.match(workflow, /^  workflow_dispatch:$/m);
   assert.ok(verificationStep >= 0);
   assert.ok(publishStep > verificationStep);
-  assert.match(workflow, /Release tag must use the stable vMAJOR\.MINOR\.PATCH format/);
-  assert.match(workflow, /asset_name="vscode-copilot-cli-launcher-\$\{expected\}\.vsix"/);
-  assert.match(workflow, /\.assets\[\].*\.digest/);
-  assert.match(workflow, /sha256sum "\$asset_path"/);
-  assert.match(workflow, /unzip -p "\$asset_path" extension\/package\.json/);
-  assert.match(workflow, /test "\$package_name" = 'vscode-copilot-cli-launcher'/);
-  assert.match(workflow, /test "\$package_publisher" = 'mikesoft'/);
-  assert.match(workflow, /test "\$package_version" = "\$expected"/);
-  assert.match(workflow, /publish --packagePath "\$VSIX_PATH"/);
+  assert.match(workflow, /gh release download "\$RELEASE_TAG"/);
+  assert.match(workflow, /gh release view "\$RELEASE_TAG"/);
+  assert.match(workflow, /--json assets/);
+  assert.match(workflow, /jq -r --arg name "\$VSIX" '\.assets\[\] \| select\(\.name == \$name\) \| \.digest'/);
+  assert.match(workflow, /sha256sum "\.release\/\$VSIX"/);
+  assert.match(workflow, /test "\$actual" = "\$expected"/);
+  assert.match(workflow, /unzip -p "\.release\/\$VSIX" extension\/package\.json/);
+  assert.match(workflow, /jq -r '\.publisher' vsix-package\.json/);
+  assert.match(workflow, /jq -r '\.name' vsix-package\.json/);
+  assert.match(workflow, /jq -r '\.version' vsix-package\.json/);
+  assert.match(workflow, /vsce@4\.1\.0 publish/);
+  assert.match(workflow, /--oidc --skip-duplicate/);
+  assert.match(workflow, /ovsx@1\.3\.0 publish/);
+  assert.match(workflow, /--trusted-publishing --skip-duplicate/);
+  assert.match(workflow, /id-token: write/);
+  assert.doesNotMatch(workflow, /VSCE_PAT|OVSX_PAT|--pat\b/);
 });
 
 test('per-launch listeners stay out of the never-drained extension subscriptions array', () => {

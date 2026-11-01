@@ -42,7 +42,7 @@ no internal endpoints, customer data, credentials, or unreleased claims.
 - `media/icon.png`: the single packaged product artwork, used for both the Marketplace listing and
   the editor-title command icon.
 - `docs/`: engineering notes and the release checklist.
-- `.github/`: issue templates, pull request guidance, CI, and the Open VSX publish workflow.
+- `.github/`: issue templates, pull request guidance, CI, and release workflows.
 
 ## Required Commands
 
@@ -128,9 +128,8 @@ command arguments, logs, pull requests, or shell history.
 
 Semantic versioning. Keep the version synchronized across `package.json`, `package-lock.json`
 (both the root and `packages[""]` entries, via `npm version --no-git-tag-version`), `CITATION.cff`,
-the version assertion in `test/metadata.test.js`, the default `tag` input of
-`.github/workflows/publish-open-vsx.yml`, and `CHANGELOG.md` (Keep a Changelog format, with the
-comparison links at the bottom).
+the version assertion in `test/metadata.test.js`, and `CHANGELOG.md` (Keep a Changelog format, with
+the comparison links at the bottom).
 
 Follow [`docs/RELEASING.md`](docs/RELEASING.md), wait for required CI checks, and verify every
 target registry after publication:
@@ -138,8 +137,7 @@ target registry after publication:
 - Visual Studio Marketplace: `mikesoft.vscode-copilot-cli-launcher`, published by the manually
   dispatched **Release** workflow through OIDC trusted publishing.
 - Open VSX: `mikesoft/vscode-copilot-cli-launcher`, published by the same **Release** workflow
-  from an existing GitHub Release asset. The older **Publish Open VSX** workflow is a migration
-  fallback only.
+  from an existing GitHub Release asset.
 
 ## Mandatory Validation Before Handoff
 
